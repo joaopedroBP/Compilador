@@ -3,9 +3,9 @@ pub struct Token{
   tipe:String,
   lexeme:String,
 }
-
-struct MathOperator{
-}
+struct MathOperator{}
+struct Digit{}
+struct Character{}
 
 impl Token{
   pub fn new(tipe:&str, lexeme:&str) -> Token{
@@ -16,7 +16,7 @@ impl Token{
   } 
 
   pub fn to_string(&self) -> String{
-    format!("<{},{}>", self.tipe,self.lexeme)
+    format!("< {} , {} >", self.tipe,self.lexeme)
   }
 }
 
@@ -36,8 +36,34 @@ impl MathOperator{
       '*' => Token::new("Math Operator", "*"),
       '/' => Token::new("Math Operator", "/"),
       '$' => Token::new("EOF","$"),
-      _=> Token::new("Err","$???"),
+      _=> Token::new("Err","???"),
     }
+  }
+}
+
+impl Digit{
+  pub fn is_digit(code: char) -> Token{
+
+    if code == '$'{
+      return Token::new("EOF","$")
+    }
+
+    match code.to_digit(10){
+      Some(digito) if (0..=9).contains(&digito) => Token::new("Digito",&digito.to_string()),
+      _=> Token::new("Err","???"),
+    }
+  }
+}
+
+impl Character{
+  pub fn is_character(code: char) -> Token{
+
+    match code{
+      character if ('a'..='z').contains(&character) || ('A'..='Z').contains(&character) =>
+       Token::new("Character",&character.to_string()),
+      '$' => Token::new("EOF","$"),    
+      _ => Token::new("Err","???"),
+    }    
   }
 }
 
@@ -50,18 +76,25 @@ fn error(code:char){
 }
 
 fn is_valid_token(code:char ) -> Token {
-  let evaluated_token : Token;
+  let mut evaluated_token : Token;
+
   evaluated_token = MathOperator::is_math_operator(code);
+  if evaluated_token.tipe != "Err" {return evaluated_token};
+
+  evaluated_token = Character::is_character(code);
+  if evaluated_token.tipe != "Err" {return evaluated_token};
   
+  evaluated_token = Digit::is_digit(code);
+  if evaluated_token.tipe != "Err" {return evaluated_token};
+
   if evaluated_token.tipe == "Err"{
     error(code)
   }
 
   evaluated_token  
-     
 }
 
-pub fn list_tokens(code:String) -> Vec<Token>{
+pub fn get_tokens(code:String) -> Vec<Token>{
   let mut tokens:Vec<Token> = Vec::new();  
   let mut code_characters = code.chars();
   let mut current_character = code_characters.next().unwrap_or('$');
@@ -82,5 +115,3 @@ pub fn list_tokens(code:String) -> Vec<Token>{
   tokens
 }
 
-
-    
