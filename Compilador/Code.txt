@@ -1,0 +1,7 @@
+if (a == b) {
+  continue;
+}
+
+function float (int a){
+  println("a");
+}
