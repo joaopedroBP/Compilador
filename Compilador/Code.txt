@@ -2,6 +2,8 @@ if (a == b) {
   continue;
 }
 
+a+b=c
+
 function float (int a){
   println("a");
 }

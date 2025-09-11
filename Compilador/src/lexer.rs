@@ -26,10 +26,10 @@ fn is_math_operator(code: &str) -> Token {
     let code_character: char = code.chars().next().unwrap_or('$');
 
     match code_character {
-        '+' => Token::new("Math Operator", "+"),
-        '-' => Token::new("Math Operator", "-"),
-        '*' => Token::new("Math Operator", "*"),
-        '/' => Token::new("Math Operator", "/"),
+        '+' => Token::new("Sum Operator", "+"),
+        '-' => Token::new("Sub Operator", "-"),
+        '*' => Token::new("Mult Operator", "*"),
+        '/' => Token::new("Div Operator", "/"),
         '$' => Token::new("EOF", "$"),
         _ => Token::new("Err", "???"),
     }
@@ -280,6 +280,17 @@ pub fn get_tokens(mut code: File) -> Vec<Token> {
           }
         }
 
+        character if is_math_operator(&character.to_string()).tipe != "Err" => {
+          if in_comment || in_string {
+            accumulator.push(character)
+          }else {
+            if !accumulator.is_empty(){
+              tokens.push(is_valid_token(&accumulator));
+              accumulator.clear();
+            }
+            tokens.push(is_math_operator(&character.to_string()))
+          }
+        }
         _ => {
           if !accumulator.is_empty(){
             tokens.push(is_valid_token(&accumulator));
