@@ -1,10 +1,8 @@
 # Compilador
-## Colaboradores
 João Pedro Bazoli Palma RA:24.123.041-5 <br>
 
-
 ## Dependências
-Rust
+Rust<br>
 Cargo
 <br>
 ## Uso
@@ -12,9 +10,8 @@ Cargo
 Crie um arquivo Code.txt e preencha ele com o codigo que quer analizar, ou descomente as seguintes linhas no main.rs e personalize o file.write:
 
 ``` rust
+use std::io::Write;
   {
-    use std::io::Write;
-
     let mut file = File::create("Code.txt").unwrap();
     file.write(b"Hello World").unwrap();
   }
