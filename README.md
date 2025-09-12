@@ -2,27 +2,31 @@
 ## Colaboradores
 João Pedro Bazoli Palma RA:24.123.041-5 <br>
 
-## Instruções de instalação e uso
-Tenha Rust + Cargo na sua maquina (de preferência na versão mais recente)<br>
 
-Para personalizar o arquivo "Code.txt" que é analisado pelo Lexer, basta descomentar essas linhas de codigo na main.rs e personalizar o "Hello World" 
+## Dependências
+Rust
+Cargo
+<br>
+## Uso
+
+Crie um arquivo Code.txt e preencha ele com o codigo que quer analizar, ou descomente as seguintes linhas no main.rs e personalize o file.write:
+
 ``` rust
   {
+    use std::io::Write;
+
     let mut file = File::create("Code.txt").unwrap();
     file.write(b"Hello World").unwrap();
   }
 ```
 
-No diretório Compilador<br>
-Use o comando:
+No diretório /Compilador<br>
+Compile o programa com:
 ``` bash
 cargo build
 ```
-Isso vai compilar o programa <br>
-
-Depois use o comando:
+Depois teste ele com:
 ``` bash
 cargo run
 ```
-Isso vai roda-lo
 
