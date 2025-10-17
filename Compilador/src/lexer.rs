@@ -313,6 +313,7 @@ pub fn get_tokens(mut code: File) -> Vec<Token> {
                 let t = is_valid_token(&character.to_string());
 
                 if t.tipe == "EOF" {
+                    tokens.push(t);
                     break;
                 }
 
@@ -321,6 +322,7 @@ pub fn get_tokens(mut code: File) -> Vec<Token> {
         }
     }
 
+    tokens.push(Token::new("EOF", "$"));
     if !accumulator.is_empty() {
         tokens.push(is_valid_token(&accumulator));
         accumulator.clear();

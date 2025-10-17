@@ -1,0 +1,5 @@
+GRAMATICA
+
+IF
+S -> 'if' ('op') { 'then' }
+'if' -> 
