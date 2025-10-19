@@ -3,8 +3,38 @@ GRAMATICA
 Regra if:
 
 IF -> 'if' '(' COND ')' '{' CORPO '}' ELSE
-ELSE -> 'else' '{' CORPO '}' ELSEIF | e
-ELSEIF -> IF | e
-COND -> (ID | NUM) ( OP_COMP ) (ID|NUM|TRUE|FALSE)
+ELSE -> 'else' ELSE_KIND | e
+ELSEIF -> IF | '{' CORPO '}'
+COND -> EXP_OU
+EXP_OU -> EXP_E ( '||' EXP_E)*
+EXP_E -> EXP_COMP ( '&&' EXP_COMP )
+EXP_COMP -> (ID|NUM|TRUE|FALSE) ( OP_COMP ) (ID|NUM|TRUE|FALSE)
 OP_COMP -> '>' | '<' | '<=' | '>=' | '=''=' | '!='  
-CORPO -> (IF | FUNC | OP ..... etc)*
+CORPO -> (IF| OP ..... etc)* 
+
+Regra function:
+
+FUNC ->  TYPE ':' function ID '(' PARAMETER ')' '{' CORPO '}'
+TYPE -> INT | FLOAT | VOID | BOOL | CHAR
+PARAMETER -> TYPE ':' ID ( ',' TYPE ':' ID)* | e
+CORPO -> (IF| OP ..... etc)* 
+
+Regra while:
+
+WHILE -> 'while' '(' PARAMETER ')' '{' CORPO '}'
+PARAMETER -> OU_PAR
+OU_PAR -> E_PAR ( '||' E_PAR )*
+E_PAR -> COMP_PAR ( '&&' COMP_PAR )*
+COMP_PAR -> (ID|NUM|TRUE|FALSE) ( OP_COMP ) (ID|NUM|TRUE|FALSE)
+OP_COMP -> '>' | '<' | '<=' | '>=' | '=''=' | '!='
+CORPO -> (IF| OP ..... etc)*
+
+Regra for:
+
+FOR -> 'for' '(' COMPARATOR ';' COMPARATION ';' CHANGE ')' '{' CORPO '}'
+COMPARATOR -> INT_DECLARATION | ID
+INT_DECLARATIONN -> 'INT' ':' ID '=' INTEGER
+COMPARATION -> ID ( OP_COMP ) (ID|NUM|TRUE|FALSE)
+OP_COMP -> '>' | '<' | '<=' | '>=' | '=''=' | '!='
+CHANGE -> 
+
