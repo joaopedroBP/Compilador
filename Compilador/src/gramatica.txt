@@ -2,12 +2,9 @@ GRAMATICA
 
 Regra if:
 
-:IF -> 'if' '(' COND ')' '{' CORPO '}' ELSE
-ELSE -> 'else' CORPO | ELSEIF | e
-ELSEIF -> 'else' IF
-COND -> ID COND_ID | NUM COND_NUM 
-COND_ID -> '>' ID | '<' ID | '=''=' ID | '!''=' ID
-'>' NUM | '<' NUM | '=''=' NUM | '!''=' NUM
-COND_NUM -> '>' ID | '<' ID | '=''=' ID | '!''=' ID
-'>' NUM | '<' NUM | '=''=' NUM | '!''=' NUM
-CORPO -> IF | FUNC | OP ..... etc
+IF -> 'if' '(' COND ')' '{' CORPO '}' ELSE
+ELSE -> 'else' '{' CORPO '}' ELSEIF | e
+ELSEIF -> IF | e
+COND -> (ID | NUM) ( OP_COMP ) (ID|NUM|TRUE|FALSE)
+OP_COMP -> '>' | '<' | '<=' | '>=' | '=''=' | '!='  
+CORPO -> (IF | FUNC | OP ..... etc)*
