@@ -3,7 +3,7 @@ GRAMATICA
 Regras simples:
 
 digit -> [0-9]
-integer -> 0 | [1-9]+
+integer -> 0 | [1-9] [0-9]*
 float -> [0-9]+ '.' [0-9]+
 NUM -> integer | float
 char -> [a-z] | [A-Z]
@@ -13,19 +13,26 @@ ID -> [a-z|A-Z] [a-z|A-Z|0-9|'_']*
 space -> ' '
 symbol ->['!'|'@'|'#'|'\'|'$'|'%'|'&'|'*'|'('|')'|'_'|'+'|'-'|'='|'['|']'|'{'|'}'|';'|'''|':'|','|'.'|'>'|'<'|'/'|'?' | '|'
 
-Regra STRING:
+Regra Bloco:
+S -> BLOCO
+BLOCO -> CMD | CMD BLOCO
+CMD -> [IF|FOR|WHILE|function|println|scanln|declaração|atribuição|FUNC_CALL,break,continue,return]
+
+Regra string:
 STRING -> '"' STRING_CONTENT '"'
-STRING_CONTENT -> (char | digit | symbol | space | special_char)
+STRING_CONTENT -> (char | digit | symbol | space | '\n')*
 
 Regra OPERATION:
 
-OP -> EXP ';'
-EXP -> ID EXP'| NUM EXP' | '(' EXP ')' EXP'
-EXP' -> OP_MAT EXP EXP' | e
+E -> T E'
+E' -> '+' T E' | '-' T E' | e
+T -> F T'
+T' -> '*' F T' | / F T' | e
+F -> id | NUM | (E)
 
 Regra println:
 PRIN -> 'println' '(' CONTENT VARS ')' ';'
-CORPO -> STRING 
+CONTENT -> STRING 
 VARS -> [ ',' ID ]+ | e
 
 Regra scanln:
@@ -33,7 +40,7 @@ SCAN -> 'scanln' '(' ID (',' ID)* ')' ';'
 
 Regra Declaração:
 
-DEC -> TYPE ':' ID '=' (ID|VALUE|FUNC_CALL) ';'
+DEC -> TYPE ':' ID '=' (ID|VALUE|FUNC_CALL_IMP) ';'
 TYPE -> 'INT' | 'FLOAT' | 'VOID' | 'CHAR' | 'BOOL'
 VALUE -> integer | float | boolean | char | ID
 
@@ -41,56 +48,59 @@ Regra Atibuição:
 ATB -> ID OP_ATB ';'
 OP_ATB -> MATH_OP  | SIMP_OP
 MATH_OP -> ATB_TYPE OPERATION
-ATB_TYPE -> += | -= | = 
+ATB_TYPE -> '+=' | '-=' | '*=' | '/=' | '=' 
 SIMP_OP -> '++' | '--'
 
 Regra if:
 
-IF -> 'if' '(' COND ')' '{' CORPO '}' ELSE
-ELSE -> 'else' ELSE_KIND | e
+IF -> 'if' '(' COND ')' '{' Bloco '}' ELSE
+ELSE -> 'else' ELSEIF | e
 ELSEIF -> IF | '{' CORPO '}'
 COND -> EXP_OU
 EXP_OU -> EXP_E ( '||' EXP_E)* 
 EXP_E -> EXP_COMP ( '&&' EXP_COMP )
-EXP_COMP -> (ID|NUM|TRUE|FALSE|OPERATION) ( OP_COMP ) (ID|NUM|TRUE|FALSE|OPERATION)
+EXP_COMP -> (ID|NUM|TRUE|FALSE|OPERATION|FUNC_CALL_IMP) ( OP_COMP ) (ID|NUM|TRUE|FALSE|OPERATION|FUNC_CALL_IMP)
 OP_COMP -> '>' | '<' | '<=' | '>=' | '=''=' | '!='  
-CORPO -> (IF| OP ..... ejc)* 
 
 Regra function:
 
-FUNC ->  TYPE ':' 'function' ID '(' PARAMETER ')' '{' CORPO RETORNO '}'
+FUNC ->  TYPE ':' 'function' ID '(' PARAMETER ')' '{' Bloco RETORNO '}'
 TYPE -> 'INT' | 'FLOAT' | 'VOID' | 'BOOL' | 'CHAR'
 PARAMETER -> TYPE ':' ID ( ',' TYPE ':' ID)* | e
-CORPO -> (IF| OP ..... etc)*
 RETORNO -> 'return' (ID | TYPE) ';' | e
 
 Regra while:
 
-WHILE -> 'while' '(' PARAMETER ')' '{' CORPO '}'
+WHILE -> 'while' '(' PARAMETER ')' '{' Bloco '}'
 PARAMETER -> OU_PAR
 OU_PAR -> E_PAR ( '||' E_PAR )*
 E_PAR -> COMP_PAR ( '&&' COMP_PAR )*
 COMP_PAR -> (ID|NUM|TRUE|FALSE|OPERATION) ( OP_COMP ) (ID|NUM|TRUE|FALSE|OPERATION)
 OP_COMP -> '>' | '<' | '<=' | '>=' | '=''=' | '!='
-CORPO -> (IF| OP ..... etc)*
 
 Regra for (ARRUMAR  o CHANGE):
 
-FOR -> 'for' '(' COMPARATOR ';' COMPARATION ';' CHANGE ')' '{' CORPO '}'
+FOR -> 'for' '(' COMPARATOR ';' COMPARATION ';' CHANGE ')' '{' Bloco '}'
 COMPARATOR -> INT_DECLARATION | ID
 INT_DECLARATION -> 'INT' ':' ID '=' INTEGER
 COMPARATION -> ID ( OP_COMP ) (ID|NUM|TRUE|FALSE|OPERATION)
 OP_COMP -> '>' | '<' | '<=' | '>=' | '=''=' | '!='
-CHANGE -> ID OP_CHANGE (ID|NUM)
-OP_CHANGE -> '++' | '--' | '+=' | '-=' | '='|
-CORPO -> (IF| OP ..... etc)*
+CHANGE -> ID OP_ATB
+OP_ATB -> MATH_OP  | SIMP_OP
+MATH_OP -> ATB_TYPE OPERATION
+ATB_TYPE -> += | -= | *= | /= | =
+SIMP_OP -> '++' | '--'
 
 Regra FUNC_CALL:
-CALL -> ID '(' PARMETER ')' END
+
+CALL -> ID '(' PARMETER ')' ';'
 PARAMETER -> TYPE ':' ID ( ',' TYPE ':' ID)* | e
-END -> ';' | e
+
+Regra FUNC_CALL_IMP:
+
+CALL -> ID '(' PARMETER ')'
+PARAMETER -> TYPE ':' ID ( ',' TYPE ':' ID)* | e
 
 Regra Main:
 
-MAIN -> INT ':' 'function' 'MAIN' '(' ')' '{' CORPO '}
-CORPO -> (IF| OP ..... etc)*
+MAIN -> INT ':' 'function' 'MAIN' '(' ')' '{' BLOCO '}

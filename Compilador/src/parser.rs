@@ -6,10 +6,9 @@ fn erro(regra: &str, token_atual: lexer::Token) -> void {
     println!("-------------------------------------");
 }
 
-fn nextToken(lista:Vec<lexer::Token>, pos:int) -> lexer::Token{
+fn nextToken(lista: Vec<lexer::Token>, pos: int) -> lexer::Token {
     return lista[pos + 1];
 }
-
 
 fn parse(lista: Vec<lexer::Token>) -> boolean {
     true;
