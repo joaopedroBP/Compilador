@@ -1,23 +1,64 @@
 GRAMATICA
 
+Regras simples:
+
+digito -> [0-9]
+integer -> 0 | [1-9]*
+float -> [0-9]+ '.' [0-9]+
+NUM -> integer | float
+char -> [a-z] | [A-Z]
+boolean = TRUE | False
+MATH_OP -> '+' | '-' | '*' | '/' | '%'
+ID -> [a-z|A-Z] [a-z|A-Z|0-9|'_']*
+
+
+Regra OPERATION:
+
+OP -> EXP ';'
+EXP -> ID EXP' | OP_AB EXP OP_FP EXP'
+EXP' -> OP_MAT EXP EXP' | e
+
+Regra println:
+PRIN -> 'println' '(' CORPO VARS ')'
+CORPO -> '"' [char|NUM|special_character| " " | \n |  
+VARS -> [ ',' ID ]+ | e
+
+Regra scanln:
+SCAN -> 'scanln' '(' ID OP_SCAN ')'
+OP_SCAN -> [ ',' ID]+ | e
+
+Regra Declaração:
+
+DEC -> TYPE ':' ID '=' (ID|VALUE) ';'
+TYPE -> 'INT' | 'FLOAT' | 'VOID' | 'CHAR'
+VALUE -> integer | float | boolean | char 
+
+Regra Atibuição:
+ATB -> ID OP_ATB ';'
+OP_ATB -> MATH_OP  | SIMP_OP
+MATH_OP -> ATB_TYPE OPERATION
+ATB_TYPE -> += | -= | = 
+SIMP_OP -> '++' | '--'
+
 Regra if:
 
 IF -> 'if' '(' COND ')' '{' CORPO '}' ELSE
 ELSE -> 'else' ELSE_KIND | e
 ELSEIF -> IF | '{' CORPO '}'
 COND -> EXP_OU
-EXP_OU -> EXP_E ( '||' EXP_E)*
+EXP_OU -> EXP_E ( '||' EXP_E)* 
 EXP_E -> EXP_COMP ( '&&' EXP_COMP )
 EXP_COMP -> (ID|NUM|TRUE|FALSE) ( OP_COMP ) (ID|NUM|TRUE|FALSE)
 OP_COMP -> '>' | '<' | '<=' | '>=' | '=''=' | '!='  
-CORPO -> (IF| OP ..... etc)* 
+CORPO -> (IF| OP ..... ejc)* 
 
 Regra function:
 
-FUNC ->  TYPE ':' function ID '(' PARAMETER ')' '{' CORPO '}'
-TYPE -> INT | FLOAT | VOID | BOOL | CHAR
+FUNC ->  TYPE ':' 'function' ID '(' PARAMETER ')' '{' CORPO RETORNO '}'
+TYPE -> 'INT' | 'FLOAT' | 'VOID' | 'BOOL' | CHAR'
 PARAMETER -> TYPE ':' ID ( ',' TYPE ':' ID)* | e
-CORPO -> (IF| OP ..... etc)* 
+CORPO -> (IF| OP ..... etc)*
+RETORNO -> 'return' (ID | TYPE) | e
 
 Regra while:
 
@@ -36,5 +77,11 @@ COMPARATOR -> INT_DECLARATION | ID
 INT_DECLARATIONN -> 'INT' ':' ID '=' INTEGER
 COMPARATION -> ID ( OP_COMP ) (ID|NUM|TRUE|FALSE)
 OP_COMP -> '>' | '<' | '<=' | '>=' | '=''=' | '!='
-CHANGE -> 
+CHANGE -> ID OP_CHANGE (ID|NUM)
+OP_CHANGE -> '++' | '--' | '+=' | '-=' | '='
+CORPO -> (IF| OP ..... etc)*
 
+Regra Main:
+
+MAIN -> INT ':' 'function' 'MAIN' '(' ')' '{' CORPO '}
+CORPO -> (IF| OP ..... etc)*

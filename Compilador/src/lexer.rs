@@ -113,7 +113,7 @@ fn is_reserved_name(code: &str) -> Token {
         "TRUE" => Token::new("Reserved_TRUE", "TRUE"),
         "FALSE" => Token::new("Reserved_FALSE", "FALSE"),
         "continue" => Token::new("Reserved_continue", "continue"),
-        "main" => Token::new("Reserveda_main", "main"),
+        "MAIN" => Token::new("Reserveda_MAIN", "MAIN"),
         _ => Token::new("Err", "???"),
     }
 }
