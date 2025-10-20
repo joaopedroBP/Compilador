@@ -16,7 +16,7 @@ symbol ->['!'|'@'|'#'|'\'|'$'|'%'|'&'|'*'|'('|')'|'_'|'+'|'-'|'='|'['|']'|'{'|'}
 Regra Bloco:
 S -> BLOCO
 BLOCO -> CMD | CMD BLOCO
-CMD -> [IF|FOR|WHILE|function|println|scanln|declaração|atribuição|FUNC_CALL,break,continue,return]
+CMD -> [IF|FOR|WHILE|function|println|scanln|declaração|atribuição|FUNC_CALL|break|continue|return]
 
 Regra string:
 STRING -> '"' STRING_CONTENT '"'
@@ -28,7 +28,7 @@ E -> T E'
 E' -> '+' T E' | '-' T E' | e
 T -> F T'
 T' -> '*' F T' | / F T' | e
-F -> id | NUM | (E)
+F -> id | NUM | FUNC_CALL_IMP | (E)
 
 Regra println:
 PRIN -> 'println' '(' CONTENT VARS ')' ';'
@@ -40,9 +40,9 @@ SCAN -> 'scanln' '(' ID (',' ID)* ')' ';'
 
 Regra Declaração:
 
-DEC -> TYPE ':' ID '=' (ID|VALUE|FUNC_CALL_IMP) ';'
+DEC -> TYPE ':' ID '=' (ID|VALUE) ';'
 TYPE -> 'INT' | 'FLOAT' | 'VOID' | 'CHAR' | 'BOOL'
-VALUE -> integer | float | boolean | char | ID
+VALUE -> integer | float | boolean | char | ID | FUNC_CALL_IMPL
 
 Regra Atibuição:
 ATB -> ID OP_ATB ';'
@@ -78,7 +78,7 @@ E_PAR -> COMP_PAR ( '&&' COMP_PAR )*
 COMP_PAR -> (ID|NUM|TRUE|FALSE|OPERATION) ( OP_COMP ) (ID|NUM|TRUE|FALSE|OPERATION)
 OP_COMP -> '>' | '<' | '<=' | '>=' | '=''=' | '!='
 
-Regra for (ARRUMAR  o CHANGE):
+Regra for :
 
 FOR -> 'for' '(' COMPARATOR ';' COMPARATION ';' CHANGE ')' '{' Bloco '}'
 COMPARATOR -> INT_DECLARATION | ID
@@ -93,14 +93,14 @@ SIMP_OP -> '++' | '--'
 
 Regra FUNC_CALL:
 
-CALL -> ID '(' PARMETER ')' ';'
-PARAMETER -> TYPE ':' ID ( ',' TYPE ':' ID)* | e
+CALL -> ID '(' ARGUMENT ')' ';'
+ARGUMENT -> TYPE ':' ID ( ',' TYPE ':' ID)* | e
 
 Regra FUNC_CALL_IMP:
 
-CALL -> ID '(' PARMETER ')'
-PARAMETER -> TYPE ':' ID ( ',' TYPE ':' ID)* | e
+CALL -> ID '(' ARGUMENT ')'
+ARGUMENT -> TYPE ':' ID ( ',' TYPE ':' ID)* | e
 
 Regra Main:
 
-MAIN -> INT ':' 'function' 'MAIN' '(' ')' '{' BLOCO '}
+MAIN -> INT ':' 'function' 'MAIN' '(' ')' '{' BLOCO '}'
