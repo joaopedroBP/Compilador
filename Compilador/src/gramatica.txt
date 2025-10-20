@@ -11,7 +11,7 @@ boolean = 'TRUE' | 'False'
 MATH_OP -> '+' | '-' | '*' | '/' | '%'
 ID -> [a-z|A-Z] [a-z|A-Z|0-9|'_']*
 space -> ' '
-symbol -> 
+symbol ->['!'|'@'|'#'|'\'|'$'|'%'|'&'|'*'|'('|')'|'_'|'+'|'-'|'='|'['|']'|'{'|'}'|';'|'''|':'|','|'.'|'>'|'<'|'/'|'?' | '|'
 
 Regra STRING:
 STRING -> '"' STRING_CONTENT '"'
@@ -33,9 +33,9 @@ SCAN -> 'scanln' '(' ID (',' ID)* ')' ';'
 
 Regra Declaração:
 
-DEC -> TYPE ':' ID '=' (ID|VALUE) ';'
-TYPE -> 'INT' | 'FLOAT' | 'VOID' | 'CHAR'
-VALUE -> integer | float | boolean | char 
+DEC -> TYPE ':' ID '=' (ID|VALUE|FUNC_CALL) ';'
+TYPE -> 'INT' | 'FLOAT' | 'VOID' | 'CHAR' | 'BOOL'
+VALUE -> integer | float | boolean | char | ID
 
 Regra Atibuição:
 ATB -> ID OP_ATB ';'
@@ -52,17 +52,17 @@ ELSEIF -> IF | '{' CORPO '}'
 COND -> EXP_OU
 EXP_OU -> EXP_E ( '||' EXP_E)* 
 EXP_E -> EXP_COMP ( '&&' EXP_COMP )
-EXP_COMP -> (ID|NUM|TRUE|FALSE) ( OP_COMP ) (ID|NUM|TRUE|FALSE)
+EXP_COMP -> (ID|NUM|TRUE|FALSE|OPERATION) ( OP_COMP ) (ID|NUM|TRUE|FALSE|OPERATION)
 OP_COMP -> '>' | '<' | '<=' | '>=' | '=''=' | '!='  
 CORPO -> (IF| OP ..... ejc)* 
 
 Regra function:
 
 FUNC ->  TYPE ':' 'function' ID '(' PARAMETER ')' '{' CORPO RETORNO '}'
-TYPE -> 'INT' | 'FLOAT' | 'VOID' | 'BOOL' | CHAR'
+TYPE -> 'INT' | 'FLOAT' | 'VOID' | 'BOOL' | 'CHAR'
 PARAMETER -> TYPE ':' ID ( ',' TYPE ':' ID)* | e
 CORPO -> (IF| OP ..... etc)*
-RETORNO -> 'return' (ID | TYPE) | e
+RETORNO -> 'return' (ID | TYPE) ';' | e
 
 Regra while:
 
@@ -70,20 +70,25 @@ WHILE -> 'while' '(' PARAMETER ')' '{' CORPO '}'
 PARAMETER -> OU_PAR
 OU_PAR -> E_PAR ( '||' E_PAR )*
 E_PAR -> COMP_PAR ( '&&' COMP_PAR )*
-COMP_PAR -> (ID|NUM|TRUE|FALSE) ( OP_COMP ) (ID|NUM|TRUE|FALSE)
+COMP_PAR -> (ID|NUM|TRUE|FALSE|OPERATION) ( OP_COMP ) (ID|NUM|TRUE|FALSE|OPERATION)
 OP_COMP -> '>' | '<' | '<=' | '>=' | '=''=' | '!='
 CORPO -> (IF| OP ..... etc)*
 
-Regra for:
+Regra for (ARRUMAR  o CHANGE):
 
 FOR -> 'for' '(' COMPARATOR ';' COMPARATION ';' CHANGE ')' '{' CORPO '}'
 COMPARATOR -> INT_DECLARATION | ID
-INT_DECLARATIONN -> 'INT' ':' ID '=' INTEGER
-COMPARATION -> ID ( OP_COMP ) (ID|NUM|TRUE|FALSE)
+INT_DECLARATION -> 'INT' ':' ID '=' INTEGER
+COMPARATION -> ID ( OP_COMP ) (ID|NUM|TRUE|FALSE|OPERATION)
 OP_COMP -> '>' | '<' | '<=' | '>=' | '=''=' | '!='
 CHANGE -> ID OP_CHANGE (ID|NUM)
-OP_CHANGE -> '++' | '--' | '+=' | '-=' | '='
+OP_CHANGE -> '++' | '--' | '+=' | '-=' | '='|
 CORPO -> (IF| OP ..... etc)*
+
+Regra FUNC_CALL:
+CALL -> ID '(' PARMETER ')' END
+PARAMETER -> TYPE ':' ID ( ',' TYPE ':' ID)* | e
+END -> ';' | e
 
 Regra Main:
 
