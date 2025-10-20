@@ -2,30 +2,34 @@ GRAMATICA
 
 Regras simples:
 
-digito -> [0-9]
-integer -> 0 | [1-9]*
+digit -> [0-9]
+integer -> 0 | [1-9]+
 float -> [0-9]+ '.' [0-9]+
 NUM -> integer | float
 char -> [a-z] | [A-Z]
-boolean = TRUE | False
+boolean = 'TRUE' | 'False'
 MATH_OP -> '+' | '-' | '*' | '/' | '%'
 ID -> [a-z|A-Z] [a-z|A-Z|0-9|'_']*
+space -> ' '
+symbol -> 
 
+Regra STRING:
+STRING -> '"' STRING_CONTENT '"'
+STRING_CONTENT -> (char | digit | symbol | space | special_char)
 
 Regra OPERATION:
 
 OP -> EXP ';'
-EXP -> ID EXP' | OP_AB EXP OP_FP EXP'
+EXP -> ID EXP'| NUM EXP' | '(' EXP ')' EXP'
 EXP' -> OP_MAT EXP EXP' | e
 
 Regra println:
-PRIN -> 'println' '(' CORPO VARS ')'
-CORPO -> '"' [char|NUM|special_character| " " | \n |  
+PRIN -> 'println' '(' CONTENT VARS ')' ';'
+CORPO -> STRING 
 VARS -> [ ',' ID ]+ | e
 
 Regra scanln:
-SCAN -> 'scanln' '(' ID OP_SCAN ')'
-OP_SCAN -> [ ',' ID]+ | e
+SCAN -> 'scanln' '(' ID (',' ID)* ')' ';'
 
 Regra Declaração:
 
