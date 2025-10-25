@@ -20,7 +20,8 @@ CMD -> [IF|FOR|WHILE|function|println|scanln|declaração|atribuição|FUNC_CALL
 
 Regra string:
 STRING -> '"' STRING_CONTENT '"'
-STRING_CONTENT -> (char | digit | symbol | space | '\n')*
+STRING_CONTET = e | CONTENT STRING_CONTENT
+CONTENT -> (char | digit | symbol | space | '\n')
 
 Regra OPERATION:
 
@@ -33,10 +34,11 @@ F -> id | NUM | FUNC_CALL_IMP | (E)
 Regra println:
 PRIN -> 'println' '(' CONTENT VARS ')' ';'
 CONTENT -> STRING 
-VARS -> [ ',' ID ]+ | e
+VARS -> [ ',' ID ] VARS | e
 
 Regra scanln:
-SCAN -> 'scanln' '(' ID (',' ID)* ')' ';'
+SCAN -> 'scanln' '(' ID IDS ')' ';'
+IDS -> ',' ID IDS | e
 
 Regra Declaração:
 
@@ -57,8 +59,10 @@ IF -> 'if' '(' COND ')' '{' Bloco '}' ELSE
 ELSE -> 'else' ELSEIF | e
 ELSEIF -> IF | '{' CORPO '}'
 COND -> EXP_OU
-EXP_OU -> EXP_E ( '||' EXP_E)* 
-EXP_E -> EXP_COMP ( '&&' EXP_COMP )
+EXP_OUT -> EXP_E EXP_OUL
+EXP_OUL -> '||' EXP_E EXP_OUL || e
+EXP_E -> EXP_COMP EXP_EL
+EXP_EL -> '&&' EXP_COMP EXP_EL
 EXP_COMP -> (ID|NUM|TRUE|FALSE|OPERATION|FUNC_CALL_IMP) ( OP_COMP ) (ID|NUM|TRUE|FALSE|OPERATION|FUNC_CALL_IMP)
 OP_COMP -> '>' | '<' | '<=' | '>=' | '=''=' | '!='  
 
@@ -66,15 +70,18 @@ Regra function:
 
 FUNC ->  TYPE ':' 'function' ID '(' PARAMETER ')' '{' Bloco RETORNO '}'
 TYPE -> 'INT' | 'FLOAT' | 'VOID' | 'BOOL' | 'CHAR'
-PARAMETER -> TYPE ':' ID ( ',' TYPE ':' ID)* | e
+PARAMETER -> TYPE ':' ID PARAMS | e
+PARAMS _> ',' TYPE ':' ID PARAMS | e
 RETORNO -> 'return' (ID | TYPE) ';' | e
 
 Regra while:
 
-WHILE -> 'while' '(' PARAMETER ')' '{' Bloco '}'
-PARAMETER -> OU_PAR
-OU_PAR -> E_PAR ( '||' E_PAR )*
-E_PAR -> COMP_PAR ( '&&' COMP_PAR )*
+WHILE -> 'while' '(' WPARAMETER ')' '{' Bloco '}'
+WPARAMETER -> OU_PAR
+OU_PAR -> E_PAR OU_PARL
+OU_PARL -> '||' E_PAR OU_PARL | 
+E_PAR -> COMP_PAR E_PARL
+E_PARL -> '&&' COMP_PAR E_PARL | e
 COMP_PAR -> (ID|NUM|TRUE|FALSE|OPERATION) ( OP_COMP ) (ID|NUM|TRUE|FALSE|OPERATION)
 OP_COMP -> '>' | '<' | '<=' | '>=' | '=''=' | '!='
 
@@ -94,12 +101,14 @@ SIMP_OP -> '++' | '--'
 Regra FUNC_CALL:
 
 CALL -> ID '(' ARGUMENT ')' ';'
-ARGUMENT -> TYPE ':' ID ( ',' TYPE ':' ID)* | e
+ARGUMENT -> TYPE ':' ID ARGUMENTL | e
+ARGUMENTL -> ',' TYPE ':' ID ARGUMENTL | e
 
 Regra FUNC_CALL_IMP:
 
 CALL -> ID '(' ARGUMENT ')'
-ARGUMENT -> TYPE ':' ID ( ',' TYPE ':' ID)* | e
+ARGUMENT -> TYPE ':' ID ARGUMENTL | e
+ARGUMENTL -> ',' TYPE ':' ID ARGUMENTL | e 
 
 Regra Main:
 

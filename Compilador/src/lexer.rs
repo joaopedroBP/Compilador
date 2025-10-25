@@ -97,11 +97,11 @@ fn is_reserved_name(code: &str) -> Token {
     match code {
         "println" => Token::new("Reserved", "println"),
         "function" => Token::new("Reserved", "function"),
-        "int" => Token::new("Reserved", "int"),
-        "float" => Token::new("Reserved", "float"),
-        "char" => Token::new("Reserved", "char"),
+        "INT" => Token::new("Reserved_INT", "INT"),
+        "FLOAT" => Token::new("Reserved_FLOAT", "FLOAT"),
+        "CHAR" => Token::new("Reserved_CHAR", "CHAR"),
         "scanln" => Token::new("Reserved", "scanln"),
-        "void" => Token::new("Reserved", "void"),
+        "VOID" => Token::new("Reserved_VOID", "VOID"),
         "if" => Token::new("Reserved", "if"),
         "else" => Token::new("Reserved", "else"),
         "while" => Token::new("Reserved", "while"),
@@ -109,8 +109,8 @@ fn is_reserved_name(code: &str) -> Token {
         "break" => Token::new("Reserved", "break"),
         "return" => Token::new("Reserved", "return"),
         "struct" => Token::new("Reserved", "struct"),
-        "true" => Token::new("Reserved", "true"),
-        "false" => Token::new("Reserved", "false"),
+        "TRUE" => Token::new("Reserved_TRUE", "TRUE"),
+        "FALSE" => Token::new("Reserved_FALSE", "FALSE"),
         "continue" => Token::new("Reserved", "continue"),
         "main" => Token::new("Reserved", "main"),
         _ => Token::new("Err", "???"),
@@ -266,7 +266,6 @@ pub fn get_tokens(mut code: File) -> Vec<Token> {
                         tokens.push(is_valid_token(&accumulator));
                         accumulator.clear();
                     }
-                    tokens.push(Token::new("Newline", "\\n"));
                 } else {
                     accumulator.push('\n');
                 }
