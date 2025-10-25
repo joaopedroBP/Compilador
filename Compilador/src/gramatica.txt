@@ -20,7 +20,7 @@ CMD -> [IF|FOR|WHILE|function|println|scanln|declaração|atribuição|FUNC_CALL
 
 Regra string:
 STRING -> '"' STRING_CONTENT '"'
-STRING_CONTET = e | CONTENT STRING_CONTENT
+STRING_CONTENT = e | CONTENT STRING_CONTENT
 CONTENT -> (char | digit | symbol | space | '\n')
 
 Regra OPERATION:
@@ -28,7 +28,7 @@ Regra OPERATION:
 E -> T E'
 E' -> '+' T E' | '-' T E' | e
 T -> F T'
-T' -> '*' F T' | / F T' | e
+T' -> '*' F T' | '/' F T' | e
 F -> id | NUM | FUNC_CALL_IMP | (E)
 
 Regra println:
@@ -44,7 +44,7 @@ Regra Declaração:
 
 DEC -> TYPE ':' ID '=' (ID|VALUE) ';'
 TYPE -> 'INT' | 'FLOAT' | 'VOID' | 'CHAR' | 'BOOL'
-VALUE -> integer | float | boolean | char | ID | FUNC_CALL_IMPL
+VALUE -> integer | float | boolean | char | ID | FUNC_CALL_IMP
 
 Regra Atibuição:
 ATB -> ID OP_ATB ';'
@@ -59,7 +59,7 @@ IF -> 'if' '(' COND ')' '{' Bloco '}' ELSE
 ELSE -> 'else' ELSEIF | e
 ELSEIF -> IF | '{' CORPO '}'
 COND -> EXP_OU
-EXP_OUT -> EXP_E EXP_OUL
+EXP_OU -> EXP_E EXP_OUL
 EXP_OUL -> '||' EXP_E EXP_OUL || e
 EXP_E -> EXP_COMP EXP_EL
 EXP_EL -> '&&' EXP_COMP EXP_EL
@@ -71,7 +71,7 @@ Regra function:
 FUNC ->  TYPE ':' 'function' ID '(' PARAMETER ')' '{' Bloco RETORNO '}'
 TYPE -> 'INT' | 'FLOAT' | 'VOID' | 'BOOL' | 'CHAR'
 PARAMETER -> TYPE ':' ID PARAMS | e
-PARAMS _> ',' TYPE ':' ID PARAMS | e
+PARAMS -> ',' TYPE ':' ID PARAMS | e
 RETORNO -> 'return' (ID | TYPE) ';' | e
 
 Regra while:
@@ -79,7 +79,7 @@ Regra while:
 WHILE -> 'while' '(' WPARAMETER ')' '{' Bloco '}'
 WPARAMETER -> OU_PAR
 OU_PAR -> E_PAR OU_PARL
-OU_PARL -> '||' E_PAR OU_PARL | 
+OU_PARL -> '||' E_PAR OU_PARL | e
 E_PAR -> COMP_PAR E_PARL
 E_PARL -> '&&' COMP_PAR E_PARL | e
 COMP_PAR -> (ID|NUM|TRUE|FALSE|OPERATION) ( OP_COMP ) (ID|NUM|TRUE|FALSE|OPERATION)
@@ -106,7 +106,7 @@ ARGUMENTL -> ',' TYPE ':' ID ARGUMENTL | e
 
 Regra FUNC_CALL_IMP:
 
-CALL -> ID '(' ARGUMENT ')'
+ICALL -> ID '(' ARGUMENT ')'
 ARGUMENT -> TYPE ':' ID ARGUMENTL | e
 ARGUMENTL -> ',' TYPE ':' ID ARGUMENTL | e 
 

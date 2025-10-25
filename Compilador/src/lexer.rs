@@ -2,8 +2,8 @@ use std::fs::File;
 use std::io::Read;
 
 pub struct Token {
-    tipe: String,
-    lexeme: String,
+    pub tipe: String,
+    pub lexeme: String,
 }
 
 impl Token {
