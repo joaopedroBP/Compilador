@@ -57,14 +57,14 @@ Regra if:
 
 IF -> 'if' '(' COND ')' '{' Bloco '}' ELSE
 ELSE -> 'else' ELSEIF | e
-ELSEIF -> IF | '{' CORPO '}'
+ELSEIF -> IF | '{' Bloco '}'
 COND -> EXP_OU
 EXP_OU -> EXP_E EXP_OUL
-EXP_OUL -> '||' EXP_E EXP_OUL || e
+EXP_OUL -> '||' EXP_E EXP_OUL | e
 EXP_E -> EXP_COMP EXP_EL
 EXP_EL -> '&&' EXP_COMP EXP_EL
 EXP_COMP -> (ID|NUM|TRUE|FALSE|OPERATION|FUNC_CALL_IMP) ( OP_COMP ) (ID|NUM|TRUE|FALSE|OPERATION|FUNC_CALL_IMP)
-OP_COMP -> '>' | '<' | '<=' | '>=' | '=''=' | '!='  
+OP_COMP -> '>' | '<' | '<' '=' | '>''=' | '=''=' | '!''='  
 
 Regra function:
 
