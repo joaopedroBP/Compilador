@@ -17,11 +17,11 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         return true;
     }
     fn is_valid_comparated(token: &mut Token) -> bool {
-        match token.lexeme.as_str() {
-            "Floating_point" => true,
+        match token.tipe.as_str() {
+            "Floating_Point" => true,
             "Integer" => true,
-            "TRUE" => true,
-            "FALSE" => true,
+            "Reserved_TRUE" => true,
+            "Reserved_FALSE" => true,
             "ID" => true,
             _ => false,
         }
@@ -244,8 +244,12 @@ pub fn parser(lista: Vec<Token>) -> bool {
     let mut pos: usize = 0;
     let mut token: Token = Token::new("", "");
     next_token(&lista, &mut pos, &mut token);
+    let mut result: bool = false;
     while token.tipe != "EOF" {
-        parse(&lista, &mut pos, &mut token);
+        result = parse(&lista, &mut token, &mut pos);
+        if !result {
+            break;
+        }
     }
-    return true;
+    return result;
 }
