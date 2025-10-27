@@ -29,33 +29,33 @@ fn is_if(mut lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
     }
 
     fn OP_COMP(lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
-        if (token.lexeme == ">") {
+        if token.lexeme == ">" {
             (token, pos) = next_token(&lista, pos);
-            if (token.lexeme == "=") {
+            if token.lexeme == "=" {
                 (token, pos) = next_token(&lista, pos);
                 return true;
             } else {
                 return true;
             }
-        } else if (token.lexeme == "<") {
+        } else if token.lexeme == "<" {
             (token, pos) = next_token(&lista, pos);
-            if (token.lexeme == "=") {
+            if token.lexeme == "=" {
                 (token, pos) = next_token(&lista, pos);
                 return true;
             } else {
                 return true;
             }
-        } else if (token.lexeme == "!") {
+        } else if token.lexeme == "!" {
             (token, pos) = next_token(&lista, pos);
-            if (token.lexeme == "=") {
+            if token.lexeme == "=" {
                 (token, pos) = next_token(&lista, pos);
                 return true;
             } else {
                 return false;
             }
-        } else if (token.lexeme == "=") {
+        } else if token.lexeme == "=" {
             (token, pos) = next_token(&lista, pos);
-            if (token.lexeme == "=") {
+            if token.lexeme == "=" {
                 (token, pos) = next_token(&lista, pos);
                 return true;
             } else {
