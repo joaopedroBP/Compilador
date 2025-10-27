@@ -1,23 +1,22 @@
 use crate::lexer::Token;
 
-fn erro(regra: &str, token_atual: Token) {
+fn erro(regra: &str, token_atual: &mut Token) {
     println!("Regra: {}", regra);
     println!("Token invalido: {}", token_atual.tipe);
     println!("-------------------------------------");
 }
 
-fn next_token(lista: &Vec<Token>, pos: usize) -> (Token, usize) {
-    let mut aux_token = Token::new("", "");
-    aux_token.tipe = lista.get(pos).unwrap().tipe.clone();
-    aux_token.lexeme = lista.get(pos).unwrap().lexeme.clone();
-    return (aux_token, pos + 1);
+fn next_token(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) {
+    token.tipe = lista.get(*pos).unwrap().tipe.clone();
+    token.lexeme = lista.get(*pos).unwrap().lexeme.clone();
+    *pos += 1;
 }
 
-fn is_if(mut lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
-    fn Bloco(lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
+fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    fn Bloco(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         return true;
     }
-    fn is_valid_comparated(token: Token) -> bool {
+    fn is_valid_comparated(token: &mut Token) -> bool {
         match token.lexeme.as_str() {
             "Floating_point" => true,
             "Integer" => true,
@@ -28,35 +27,35 @@ fn is_if(mut lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
         }
     }
 
-    fn OP_COMP(lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
+    fn OP_COMP(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if token.lexeme == ">" {
-            (token, pos) = next_token(&lista, pos);
+            next_token(lista, pos, token);
             if token.lexeme == "=" {
-                (token, pos) = next_token(&lista, pos);
+                next_token(lista, pos, token);
                 return true;
             } else {
                 return true;
             }
         } else if token.lexeme == "<" {
-            (token, pos) = next_token(&lista, pos);
+            next_token(lista, pos, token);
             if token.lexeme == "=" {
-                (token, pos) = next_token(&lista, pos);
+                next_token(lista, pos, token);
                 return true;
             } else {
                 return true;
             }
         } else if token.lexeme == "!" {
-            (token, pos) = next_token(&lista, pos);
+            next_token(lista, pos, token);
             if token.lexeme == "=" {
-                (token, pos) = next_token(&lista, pos);
+                next_token(lista, pos, token);
                 return true;
             } else {
                 return false;
             }
         } else if token.lexeme == "=" {
-            (token, pos) = next_token(&lista, pos);
+            next_token(lista, pos, token);
             if token.lexeme == "=" {
-                (token, pos) = next_token(&lista, pos);
+                next_token(lista, pos, token);
                 return true;
             } else {
                 return false;
@@ -66,12 +65,12 @@ fn is_if(mut lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
         }
     }
 
-    fn EXP_COMP(lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
+    fn EXP_COMP(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if is_valid_comparated(token) {
-            (token, pos) = next_token(&lista, pos);
+            next_token(lista, pos, token);
             if OP_COMP(&lista, token, pos) {
                 if is_valid_comparated(token) {
-                    (token, pos) = next_token(&lista, pos);
+                    next_token(lista, pos, token);
                     return true;
                 } else {
                     return false;
@@ -84,13 +83,13 @@ fn is_if(mut lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
         }
     }
 
-    fn EXP_EL(lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
+    fn EXP_EL(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if (token.lexeme == "&") {
-            (token, pos) = next_token(&lista, pos);
+            next_token(lista, pos, token);
             if (token.lexeme == "&") {
-                (token, pos) = next_token(&lista, pos);
-                if EXP_COMP(&lista, token, pos) {
-                    if EXP_EL(&lista, token, pos) {
+                next_token(lista, pos, token);
+                if EXP_COMP(lista, token, pos) {
+                    if EXP_EL(lista, token, pos) {
                         return true;
                     } else {
                         return false;
@@ -106,8 +105,8 @@ fn is_if(mut lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
         return true;
     }
 
-    fn EXP_E(lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
-        if EXP_COMP(&lista, token, pos) {
+    fn EXP_E(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if EXP_COMP(lista, token, pos) {
             if EXP_EL(&lista, token, pos) {
                 return true;
             } else {
@@ -118,13 +117,13 @@ fn is_if(mut lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
         }
     }
 
-    fn EXP_OUL(lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
+    fn EXP_OUL(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if token.lexeme == "|" {
-            (token, pos) = next_token(&lista, pos);
+            next_token(lista, pos, token);
             if token.lexeme == "|" {
-                (token, pos) = next_token(&lista, pos);
-                if EXP_E(&lista, token, pos) {
-                    if EXP_OU(&lista, token, pos) {
+                next_token(lista, pos, token);
+                if EXP_E(lista, token, pos) {
+                    if EXP_OU(lista, token, pos) {
                         return true;
                     } else {
                         return false;
@@ -140,9 +139,9 @@ fn is_if(mut lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
         return true;
     }
 
-    fn EXP_OU(lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
-        if EXP_E(&lista, token, pos) {
-            if EXP_OUL(&lista, token, pos) {
+    fn EXP_OU(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if EXP_E(lista, token, pos) {
+            if EXP_OUL(lista, token, pos) {
                 return true;
             } else {
                 return false;
@@ -152,7 +151,7 @@ fn is_if(mut lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
         }
     }
 
-    fn COND(lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
+    fn COND(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if EXP_OU(lista, token, pos) {
             return true;
         } else {
@@ -160,14 +159,14 @@ fn is_if(mut lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
         }
     }
 
-    fn is_elseif(lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
-        if is_if(&lista, token, pos) {
+    fn is_elseif(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if is_if(lista, token, pos) {
             return true;
         } else if (token.lexeme == "{") {
-            (token, pos) = next_token(&lista, pos);
+            next_token(lista, pos, token);
             if Bloco(&lista, token, pos) {
                 if (token.lexeme == "}") {
-                    (token, pos) = next_token(&lista, pos);
+                    next_token(lista, pos, token);
                     return true;
                 } else {
                     return false;
@@ -180,10 +179,10 @@ fn is_if(mut lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
         }
     }
 
-    fn is_else(lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
+    fn is_else(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if token.lexeme == "else" {
-            (token, pos) = next_token(&lista, pos);
-            if is_elseif(&lista, token, pos) {
+            next_token(lista, pos, token);
+            if is_elseif(lista, token, pos) {
                 return true;
             } else {
                 return false;
@@ -193,17 +192,17 @@ fn is_if(mut lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
     }
 
     if token.lexeme == "if" {
-        (token, pos) = next_token(&lista, pos);
+        next_token(lista, pos, token);
         if token.lexeme == "(" {
-            (token, pos) = next_token(&lista, pos);
+            next_token(lista, pos, token);
             if COND(&lista, token, pos) {
                 if token.lexeme == ")" {
-                    (token, pos) = next_token(&lista, pos);
+                    next_token(lista, pos, token);
                     if token.lexeme == "{" {
-                        (token, pos) = next_token(&lista, pos);
+                        next_token(lista, pos, token);
                         if Bloco(&lista, token, pos) {
                             if token.lexeme == "}" {
-                                (token, pos) = next_token(&lista, pos);
+                                next_token(lista, pos, token);
                                 if is_else(&lista, token, pos) {
                                     return true;
                                 } else {
@@ -232,18 +231,21 @@ fn is_if(mut lista: &Vec<Token>, mut token: Token, mut pos: usize) -> bool {
     }
 }
 
-fn parse(lista: Vec<Token>, token: Token, pos: usize) -> bool {
-    if is_if(&lista, token, pos) {
+fn parse(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    if is_if(lista, token, pos) {
         return true;
     } else {
+        erro("if", token);
         return false;
     }
 }
 
-fn parser(lista: Vec<Token>) -> bool {
+pub fn parser(lista: Vec<Token>) -> bool {
     let mut pos: usize = 0;
     let mut token: Token = Token::new("", "");
-    (token, pos) = next_token(&lista, pos);
-    while (token.tipe != "EOF") {}
+    next_token(&lista, &mut pos, &mut token);
+    while token.tipe != "EOF" {
+        parse(&lista, &mut pos, &mut token);
+    }
     return true;
 }
