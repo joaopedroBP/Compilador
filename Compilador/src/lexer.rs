@@ -4,6 +4,8 @@ use std::io::Read;
 pub struct Token {
     pub tipe: String,
     pub lexeme: String,
+    pub linha: usize,
+    pub coluna: usize,
 }
 
 impl Token {
@@ -11,11 +13,25 @@ impl Token {
         Token {
             tipe: tipe.to_string(),
             lexeme: lexeme.to_string(),
+            linha: 0,
+            coluna: 0,
         }
     }
 
     pub fn to_string(&self) -> String {
-        format!("< {} , {} >", self.tipe, self.lexeme)
+        format!(
+            "< {} , {} > line: {}, coluna:{}",
+            self.tipe, self.lexeme, self.linha, self.coluna
+        )
+    }
+
+    pub fn add_pos(token: Token, linha: usize, coluna: usize) -> Token {
+        let mut aux_token: Token = Token::new("", "");
+        aux_token.tipe = token.tipe;
+        aux_token.lexeme = token.lexeme;
+        aux_token.linha = linha;
+        aux_token.coluna = coluna;
+        aux_token
     }
 }
 
@@ -218,11 +234,14 @@ pub fn get_tokens(mut code: File) -> Vec<Token> {
     let mut in_comment: bool = false;
     let mut in_string: bool = false;
 
+    let mut linha: usize = 1;
+    let mut coluna: usize = 1;
+
     while let Some(character) = code_characters.next() {
         match character {
             '#' if !in_comment && !in_string => {
                 if !accumulator.is_empty() {
-                    tokens.push(is_valid_token(&accumulator));
+                    tokens.push(Token::add_pos(is_valid_token(&accumulator), linha, coluna));
                     accumulator.clear();
                 }
                 in_comment = true;
@@ -232,7 +251,7 @@ pub fn get_tokens(mut code: File) -> Vec<Token> {
             '#' if in_comment != in_string => {
                 in_comment = false;
                 accumulator.push(character);
-                tokens.push(is_valid_token(&accumulator));
+                tokens.push(Token::add_pos(is_valid_token(&accumulator), linha, coluna));
                 accumulator.clear();
             }
 
@@ -240,14 +259,14 @@ pub fn get_tokens(mut code: File) -> Vec<Token> {
                 if !in_string {
                     in_string = true;
                     if !accumulator.is_empty() {
-                        tokens.push(is_valid_token(&accumulator));
+                        tokens.push(Token::add_pos(is_valid_token(&accumulator), linha, coluna));
                         accumulator.clear();
                     }
                     accumulator.push(character);
                 } else {
                     in_string = false;
                     accumulator.push(character);
-                    tokens.push(is_valid_token(&accumulator));
+                    tokens.push(Token::add_pos(is_valid_token(&accumulator), linha, coluna));
                     accumulator.clear();
                 }
             }
@@ -256,15 +275,17 @@ pub fn get_tokens(mut code: File) -> Vec<Token> {
                 if in_comment || in_string {
                     accumulator.push(character);
                 } else if !accumulator.is_empty() {
-                    tokens.push(is_valid_token(&accumulator));
+                    tokens.push(Token::add_pos(is_valid_token(&accumulator), linha, coluna));
                     accumulator.clear();
                 }
             }
 
             '\n' => {
+                linha += 1;
+                coluna = 1;
                 if !in_comment && !in_string {
                     if !accumulator.is_empty() {
-                        tokens.push(is_valid_token(&accumulator));
+                        tokens.push(Token::add_pos(is_valid_token(&accumulator), linha, coluna));
                         accumulator.clear();
                     }
                 } else {
@@ -286,10 +307,14 @@ pub fn get_tokens(mut code: File) -> Vec<Token> {
                     accumulator.push(character)
                 } else {
                     if !accumulator.is_empty() {
-                        tokens.push(is_valid_token(&accumulator));
+                        tokens.push(Token::add_pos(is_valid_token(&accumulator), linha, coluna));
                         accumulator.clear();
                     }
-                    tokens.push(is_special_character(&character.to_string()))
+                    tokens.push(Token::add_pos(
+                        is_special_character(&character.to_string()),
+                        linha,
+                        coluna,
+                    ))
                 }
             }
 
@@ -298,33 +323,38 @@ pub fn get_tokens(mut code: File) -> Vec<Token> {
                     accumulator.push(character)
                 } else {
                     if !accumulator.is_empty() {
-                        tokens.push(is_valid_token(&accumulator));
+                        tokens.push(Token::add_pos(is_valid_token(&accumulator), linha, coluna));
                         accumulator.clear();
                     }
-                    tokens.push(is_math_operator(&character.to_string()))
+                    tokens.push(Token::add_pos(
+                        is_math_operator(&character.to_string()),
+                        linha,
+                        coluna,
+                    ));
                 }
             }
             _ => {
                 if !accumulator.is_empty() {
-                    tokens.push(is_valid_token(&accumulator));
+                    tokens.push(Token::add_pos(is_valid_token(&accumulator), linha, coluna));
                     accumulator.clear();
                 }
 
                 let t = is_valid_token(&character.to_string());
 
                 if t.tipe == "EOF" {
-                    tokens.push(t);
+                    tokens.push(Token::add_pos(t, linha, coluna));
                     break;
                 }
 
-                tokens.push(t);
+                tokens.push(Token::add_pos(t, linha, coluna));
             }
         }
+        coluna += 1;
     }
 
-    tokens.push(Token::new("EOF", "$"));
+    tokens.push(Token::add_pos(Token::new("EOF", "$"), linha, coluna));
     if !accumulator.is_empty() {
-        tokens.push(is_valid_token(&accumulator));
+        tokens.push(Token::add_pos(is_valid_token(&accumulator), linha, coluna));
         accumulator.clear();
     }
 

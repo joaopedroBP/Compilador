@@ -1,10 +1,10 @@
 use crate::lexer::Token;
 
 fn erro(regra: &str, token_atual: &mut Token) {
-    println!("Regra: {}", regra);
+    println!("{} rule incorect", regra);
     println!(
-        "Token invalido: {}, {}",
-        token_atual.tipe, token_atual.lexeme
+        "Invalid Token: {}, {} at line:{} columm:{}",
+        token_atual.tipe, token_atual.lexeme, token_atual.linha, token_atual.coluna
     );
     println!("-------------------------------------");
 }
