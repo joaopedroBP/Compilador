@@ -105,6 +105,7 @@ fn is_reserved_name(code: &str) -> Token {
         "if" => Token::new("Reserved_if", "if"),
         "else" => Token::new("Reserved_if", "else"),
         "while" => Token::new("Reserved_while", "while"),
+        "BOOL" => Token::new("Reserved_BOOL", "BOOL"),
         "for" => Token::new("Reserved_for", "for"),
         "break" => Token::new("Reserved_break", "break"),
         "return" => Token::new("Reserved_return", "return"),

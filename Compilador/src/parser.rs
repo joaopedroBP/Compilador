@@ -2,7 +2,10 @@ use crate::lexer::Token;
 
 fn erro(regra: &str, token_atual: &mut Token) {
     println!("Regra: {}", regra);
-    println!("Token invalido: {}", token_atual.tipe);
+    println!(
+        "Token invalido: {}, {}",
+        token_atual.tipe, token_atual.lexeme
+    );
     println!("-------------------------------------");
 }
 
@@ -12,9 +15,70 @@ fn next_token(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) {
     *pos += 1;
 }
 
+fn is_declaration(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    fn DEC_TYPE(token: &mut Token) -> bool {
+        match token.tipe.as_str() {
+            "Reserved_FLOAT" => true,
+            "Reserved_INT" => true,
+            "Reserved_CHAR" => true,
+            "Reserved_VOID" => true,
+            "Reserved_BOOL" => true,
+            _ => false,
+        }
+    }
+
+    fn DEC_ATB(token: &mut Token) -> bool {
+        match token.tipe.as_str() {
+            "Floating_Point" => true,
+            "Integer" => true,
+            "character" => true,
+            "ID" => true,
+            "Reserved_TRUE" => true,
+            "Reserved_FALSE" => true,
+            _ => false,
+        }
+    }
+
+    if DEC_TYPE(token) {
+        next_token(lista, pos, token);
+        if token.lexeme == ":" {
+            next_token(lista, pos, token);
+            if token.tipe == "ID" {
+                next_token(lista, pos, token);
+                if token.lexeme == "=" {
+                    next_token(lista, pos, token);
+                    if DEC_ATB(token) {
+                        next_token(lista, pos, token);
+                        if token.lexeme == ";" {
+                            next_token(lista, pos, token);
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
 fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     fn Bloco(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        return true;
+        if is_declaration(lista, token, pos) {
+            return true;
+        } else {
+            return false;
+        }
     }
     fn is_valid_comparated(token: &mut Token) -> bool {
         match token.tipe.as_str() {
@@ -123,7 +187,7 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
             if token.lexeme == "|" {
                 next_token(lista, pos, token);
                 if EXP_E(lista, token, pos) {
-                    if EXP_OU(lista, token, pos) {
+                    if EXP_OUL(lista, token, pos) {
                         return true;
                     } else {
                         return false;
@@ -233,6 +297,8 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
 
 fn parse(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     if is_if(lista, token, pos) {
+        return true;
+    } else if is_declaration(lista, token, pos) {
         return true;
     } else {
         erro("if", token);
