@@ -132,15 +132,29 @@ fn is_declaration(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> boo
         }
     }
 
-    fn DEC_ATB(token: &mut Token) -> bool {
-        match token.tipe.as_str() {
-            "Floating_Point" => true,
-            "Integer" => true,
-            "character" => true,
-            "ID" => true,
-            "Reserved_TRUE" => true,
-            "Reserved_FALSE" => true,
-            _ => false,
+    fn DEC_ATB(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
+        if is_operation(lista, token, pos) {
+            return true;
+        } else if token.tipe == "Floating_Point" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "Integer" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "character" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "ID" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "Reserved_TRUE" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "Reserved_FALSE" {
+            next_token(lista, pos, token);
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -152,8 +166,7 @@ fn is_declaration(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> boo
                 next_token(lista, pos, token);
                 if token.lexeme == "=" {
                     next_token(lista, pos, token);
-                    if DEC_ATB(token) {
-                        next_token(lista, pos, token);
+                    if DEC_ATB(lista, pos, token) {
                         if token.lexeme == ";" {
                             next_token(lista, pos, token);
                             return true;

@@ -15,7 +15,8 @@ symbol ->['!'|'@'|'#'|'\'|'$'|'%'|'&'|'*'|'('|')'|'_'|'+'|'-'|'='|'['|']'|'{'|'}
 
 Regra Bloco:
 S -> BLOCO
-BLOCO -> CMD | CMD BLOCO
+BLOCO -> CMD BL
+BL -> BLOCO | e
 CMD -> [IF|FOR|WHILE|function|println|scanln|declaração|atribuição|FUNC_CALL|break|continue|return]
 
 Regra string:
@@ -25,7 +26,7 @@ CONTENT -> (char | digit | symbol | space | '\n')
 
 Regra OPERATION:
 
-E -> T E'
+E -> T E' ';'
 E' -> '+' T E' | '-' T E' | e
 T -> F T'
 T' -> '*' F T' | '/' F T' | e
@@ -44,7 +45,7 @@ Regra Declaração:
 
 DEC -> TYPE ':' ID '=' (ID|VALUE) ';'
 TYPE -> 'INT' | 'FLOAT' | 'VOID' | 'CHAR' | 'BOOL'
-VALUE -> integer | float | boolean | char | ID | FUNC_CALL_IMP
+VALUE -> integer | float | boolean | char | ID | FUNC_CALL_IMP | OPERATION
 
 Regra Atibuição:
 ATB -> ID OP_ATB ';'
