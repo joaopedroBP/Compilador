@@ -1,18 +1,5 @@
 GRAMATICA
 
-Regras simples:
-
-digit -> [0-9]
-integer -> 0 | [1-9] [0-9]*
-float -> [0-9]+ '.' [0-9]+
-NUM -> integer | float
-char -> [a-z] | [A-Z]
-boolean = 'TRUE' | 'False'
-MATH_OP -> '+' | '-' | '*' | '/' | '%'
-ID -> [a-z|A-Z] [a-z|A-Z|0-9|'_']*
-space -> ' '
-symbol ->['!'|'@'|'#'|'\'|'$'|'%'|'&'|'*'|'('|')'|'_'|'+'|'-'|'='|'['|']'|'{'|'}'|';'|'''|':'|','|'.'|'>'|'<'|'/'|'?' | '|'
-
 Regra Bloco:
 S -> BLOCO
 BLOCO -> CMD BL
@@ -26,7 +13,7 @@ CONTENT -> (char | digit | symbol | space | '\n')
 
 Regra OPERATION:
 
-E -> T E' ';'
+E -> T E' 
 E' -> '+' T E' | '-' T E' | e
 T -> F T'
 T' -> '*' F T' | '/' F T' | e
@@ -49,8 +36,8 @@ VALUE -> integer | float | boolean | char | ID | FUNC_CALL_IMP | OPERATION
 
 Regra Atibuição:
 ATB -> ID OP_ATB ';'
-OP_ATB -> MATH_OP  | SIMP_OP
-MATH_OP -> ATB_TYPE OPERATION
+OP_ATB -> COMP_OP  | SIMP_OP
+COMP_OP -> ATB_TYPE OPERATION
 ATB_TYPE -> '+=' | '-=' | '*=' | '/=' | '=' 
 SIMP_OP -> '++' | '--'
 

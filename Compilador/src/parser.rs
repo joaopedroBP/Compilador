@@ -15,6 +15,71 @@ fn next_token(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) {
     *pos += 1;
 }
 
+fn is_atribuicao(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    fn SIMP_OP(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.lexeme == "+" {
+            let mut aux_pos: usize = *pos + 1;
+            if lista[aux_pos].lexeme == "+" {
+                next_token(lista, pos, token);
+                next_token(lista, pos, token);
+                return true;
+            } else {
+                return false;
+            }
+        } else if token.lexeme == "-" {
+            let mut aux_pos: usize = *pos + 1;
+            if lista[aux_pos].lexeme == "-" {
+                next_token(lista, pos, token);
+                next_token(lista, pos, token);
+                return true;
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    fn COMP(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.lexeme == "+" {
+            next_token(lista, pos, token);
+            if token.lexeme == "=" {
+                next_token(lista, pos, token);
+                return true;
+            } else {
+                return false;
+            }
+        } else if token.lexeme == "-" {
+            return false;
+        }
+    }
+    fn OP_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if SIMP_OP(lista, token, pos) {
+            return true;
+        } else if COMP_OP(lista, token, pos) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    if token.tipe == "ID" {
+        next_token(lista, pos, token);
+        if OP_ATB(lista, token, pos) {
+            if token.lexeme == ";" {
+                next_token(lista, pos, token);
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
 fn is_operation(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     fn F(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if token.tipe == "ID" {
