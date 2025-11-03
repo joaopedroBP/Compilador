@@ -37,7 +37,8 @@ VALUE -> integer | float | boolean | char | ID | FUNC_CALL_IMP | OPERATION
 Regra Atibuição:
 ATB -> ID OP_ATB ';'
 OP_ATB -> COMP_OP  | SIMP_OP
-COMP_OP -> ATB_TYPE OPERATION
+COMP_OP -> ATB_TYPE COMP_OPTION
+COMP_OPTION -> OPERATION | ID | func_call_imp | integer | floating_point | char | boolean
 ATB_TYPE -> '+=' | '-=' | '*=' | '/=' | '=' 
 SIMP_OP -> '++' | '--'
 
@@ -56,11 +57,12 @@ OP_COMP -> '>' | '<' | '<' '=' | '>''=' | '=''=' | '!''='
 
 Regra function:
 
-FUNC ->  TYPE ':' 'function' ID '(' PARAMETER ')' '{' Bloco RETORNO '}'
-TYPE -> 'INT' | 'FLOAT' | 'VOID' | 'BOOL' | 'CHAR'
+FUNC ->  FUNC_TYPE ':' 'function' ID '(' PARAMETER ')' '{' Bloco RETORNO '}'
+FUNC_TYPE -> 'INT' | 'FLOAT' | 'VOID' | 'BOOL' | 'CHAR'
+TYPE -> INT | FLOAT | BOOL | CHAR
 PARAMETER -> TYPE ':' ID PARAMS | e
-PARAMS -> ',' TYPE ':' ID PARAMS | e
-RETORNO -> 'return' (ID | TYPE) ';' | e
+PARAMS -> ',' PARAMETER| e
+RETORNO -> 'return' (ID | integer | floating_point | char | bool) ';' | e
 
 Regra while:
 

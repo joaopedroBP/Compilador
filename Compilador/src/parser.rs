@@ -15,6 +15,203 @@ fn next_token(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) {
     *pos += 1;
 }
 
+fn is_function(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    fn FUNC_TYPE(token: &mut Token) -> bool {
+        match token.tipe.as_str() {
+            "Reserved_FLOAT" => true,
+            "Reserved_INT" => true,
+            "Reserved_CHAR" => true,
+            "Reserved_VOID" => true,
+            "Reserved_BOOL" => true,
+            _ => false,
+        }
+    }
+
+    fn TYPE(token: &mut Token) -> bool {
+        match token.tipe.as_str() {
+            "Reserved_FLOAT" => true,
+            "Reserved_INT" => true,
+            "Reserved_CHAR" => true,
+            "Reserved_BOOL" => true,
+            _ => false,
+        }
+    }
+
+    fn PARAMS(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.lexeme == "," {
+            next_token(lista, pos, token);
+            if PARAMETER(lista, token, pos) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    fn PARAMETER(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if TYPE(token) {
+            next_token(lista, pos, token);
+            if token.lexeme == ":" {
+                next_token(lista, pos, token);
+                if token.tipe == "ID" {
+                    next_token(lista, pos, token);
+                    if PARAMS(lista, token, pos) {
+                        return true;
+                    } else {
+                        return true;
+                    }
+                } else {
+                    return true;
+                }
+            } else {
+                return true;
+            }
+        }
+        return true;
+    }
+
+    fn func_blockl(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if func_block(lista, token, pos) {
+            return true;
+        } else {
+            return true;
+        }
+    }
+
+    fn CMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if is_declaration(lista, token, pos) {
+            if func_blockl(lista, token, pos) {
+                return true;
+            } else {
+                return false;
+            }
+        } else if is_atribuicao(lista, token, pos) {
+            if func_blockl(lista, token, pos) {
+                return true;
+            } else {
+                return false;
+            }
+        } else if is_if(lista, token, pos) {
+            if func_blockl(lista, token, pos) {
+                return true;
+            } else {
+                return false;
+            }
+        } else if is_function(lista, token, pos) {
+            if func_blockl(lista, token, pos) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    fn func_block(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if CMD(lista, token, pos) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    fn func_return(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.tipe == "Floating_Point" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "Integer" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "character" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "ID" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "Reserved_TRUE" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "Reserved_FALSE" {
+            next_token(lista, pos, token);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    fn Retorno(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.tipe == "Reserved_return" {
+            next_token(lista, pos, token);
+            if func_return(lista, token, pos) {
+                if token.lexeme == ";" {
+                    next_token(lista, pos, token);
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    if FUNC_TYPE(token) {
+        next_token(lista, pos, token);
+        if token.lexeme == ":" {
+            next_token(lista, pos, token);
+            if token.tipe == "Reserved_function" {
+                next_token(lista, pos, token);
+                if token.tipe == "ID" {
+                    next_token(lista, pos, token);
+                    if token.lexeme == "(" {
+                        next_token(lista, pos, token);
+                        if PARAMETER(lista, token, pos) {
+                            if token.lexeme == ")" {
+                                next_token(lista, pos, token);
+                                if token.lexeme == "{" {
+                                    next_token(lista, pos, token);
+                                    if func_block(lista, token, pos) {
+                                        if Retorno(lista, token, pos) {
+                                            if token.lexeme == "}" {
+                                                next_token(lista, pos, token);
+                                                return true;
+                                            } else {
+                                                return false;
+                                            }
+                                        } else {
+                                            return false;
+                                        }
+                                    } else {
+                                        return false;
+                                    }
+                                } else {
+                                    return false;
+                                }
+                            } else {
+                                return false;
+                            }
+                        } else {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
 fn is_atribuicao(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     fn SIMP_OP(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if token.lexeme == "+" {
@@ -40,16 +237,54 @@ fn is_atribuicao(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool
         }
     }
 
-    fn COMP(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if token.lexeme == "+" {
+    fn COMP_OPTION(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if is_operation(lista, token, pos) {
+            return true;
+        } else if token.tipe == "Floating_Point" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "Integer" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "character" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "ID" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "Reserved_TRUE" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "Reserved_FALSE" {
+            next_token(lista, pos, token);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    fn COMP_OP(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.lexeme == "+" || token.lexeme == "-" || token.lexeme == "*" || token.lexeme == "/"
+        {
             next_token(lista, pos, token);
             if token.lexeme == "=" {
                 next_token(lista, pos, token);
+                if COMP_OPTION(lista, token, pos) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else if token.lexeme == "=" {
+            next_token(lista, pos, token);
+            if COMP_OPTION(lista, token, pos) {
                 return true;
             } else {
                 return false;
             }
-        } else if token.lexeme == "-" {
+        } else {
             return false;
         }
     }
@@ -191,7 +426,6 @@ fn is_declaration(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> boo
             "Reserved_FLOAT" => true,
             "Reserved_INT" => true,
             "Reserved_CHAR" => true,
-            "Reserved_VOID" => true,
             "Reserved_BOOL" => true,
             _ => false,
         }
@@ -271,7 +505,7 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
             } else {
                 return false;
             }
-        } else if is_operation(lista, token, pos) {
+        } else if is_atribuicao(lista, token, pos) {
             if blocol(lista, token, pos) {
                 return true;
             } else {
@@ -509,7 +743,7 @@ fn parse(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         return true;
     } else if is_declaration(lista, token, pos) {
         return true;
-    } else if is_operation(lista, token, pos) {
+    } else if is_atribuicao(lista, token, pos) {
         return true;
     } else {
         erro("if", token);
