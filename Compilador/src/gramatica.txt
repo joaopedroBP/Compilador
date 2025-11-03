@@ -30,8 +30,15 @@ IDS -> ',' ID IDS | e
 
 Regra Declaração:
 
-DEC -> TYPE ':' ID '=' (ID|VALUE) ';'
-TYPE -> 'INT' | 'FLOAT' | 'VOID' | 'CHAR' | 'BOOL'
+DEC -> TYPE ':' DECLARATION
+DECLARATION -> VAR | FUNC | MAIN
+FUNC ->  'function' ID '(' PARAMETER ')' '{' Bloco_func'}'
+FUNC_TYPE -> 'INT' | 'FLOAT' | 'VOID' | 'BOOL' | 'CHAR'
+TYPE -> INT | FLOAT | BOOL | CHAR
+PARAMETER -> TYPE ':' ID PARAMS | e
+PARAMS -> ',' PARAMETER | e
+VAR -> ID '=' (ID|VALUE) ';'
+TYPE -> 'INT' | 'FLOAT' | 'CHAR' | 'BOOL'
 VALUE -> integer | float | boolean | char | ID | FUNC_CALL_IMP | OPERATION
 
 Regra Atibuição:
