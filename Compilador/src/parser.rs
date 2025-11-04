@@ -15,7 +15,7 @@ fn next_token(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) {
     *pos += 1;
 }
 
-fn func_return(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+fn return_type(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     if token.tipe == "Floating_Point" {
         next_token(lista, pos, token);
         return true;
@@ -39,10 +39,10 @@ fn func_return(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     }
 }
 
-fn ReturnCMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+fn Return(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     if token.tipe == "Reserved_return" {
         next_token(lista, pos, token);
-        if func_return(lista, token, pos) {
+        if return_type(lista, token, pos) {
             if token.lexeme == ";" {
                 next_token(lista, pos, token);
                 return true;
@@ -299,12 +299,13 @@ fn VAR(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
         next_token(lista, pos, token);
         if token.lexeme == "=" {
             next_token(lista, pos, token);
-            if DEC_ATB(lista, token, pos) {
+            if DEC_ATB(lista, pos, token) {
                 if token.lexeme == ";" {
                     next_token(lista, pos, token);
                     return true;
                 } else {
                     erro("Declaration missing end of operation sign ';'", token);
+                    return false;
                 }
             } else {
                 return false;
@@ -319,13 +320,94 @@ fn VAR(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
 }
 
 fn FUNC(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    fn PARAMETER_TYPE(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if is_operation(lista, token, pos) {
+            return true;
+        } else if token.tipe == "Floating_Point" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "Integer" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "character" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "ID" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "Reserved_TRUE" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "Reserved_FALSE" {
+            next_token(lista, pos, token);
+            return true;
+        } else {
+            erro("Missing proper declaration atribution", token);
+            return false;
+        }
+    }
+
+    fn PARAMS(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.lexeme == "," {
+            next_token(lista, pos, token);
+            if PARAMETER(lista, token, pos) {
+                return true;
+            } else {
+                erro("function parameter incorect", token);
+                return false;
+            }
+        }
+        return true;
+    }
+    fn PARAMETER(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if PARAMETER_TYPE(lista, token, pos) {
+            if token.lexeme == ":" {
+                next_token(lista, pos, token);
+                if token.tipe == "ID" {
+                    next_token(lista, pos, token);
+                    if PARAMS(lista, token, pos) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    fn CMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if is_if(lista, token, pos) {
+            return true;
+        } else if is_declaration(lista, token, pos) {
+            return true;
+        } else if is_atribuicao(lista, token, pos) {
+            return true;
+        } else if Return(lista, token, pos) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    fn func_block(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.tipe == "}" {
+            return true;
+        }
+        if CMD(lista, token, pos) {
+            return func_block(lista, token, pos);
+        } else {
+            return false;
+        }
+    }
+
     if token.tipe == "Reserved_function" {
         next_token(lista, pos, token);
         if token.tipe == "ID" {
             next_token(lista, pos, token);
             if token.lexeme == "(" {
                 next_token(lista, pos, token);
-                if PARAMETERS(lista, token, pos) {
+                if PARAMETER(lista, token, pos) {
                     if token.lexeme == ")" {
                         next_token(lista, pos, token);
                         if token.lexeme == "{" {
@@ -388,14 +470,13 @@ fn is_declaration(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> boo
     }
 
     fn DECLARATION(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
-        if VAR(lista, token, pos) {
+        if VAR(lista, pos, token) {
             return true;
         } else if FUNC(lista, token, pos) {
             return true;
-        } else if MAIN(lista, token, pos) {
-            return true;
         } else {
             erro("Missing proper Declaration", token);
+            return false;
         }
     }
 
@@ -417,51 +498,31 @@ fn is_declaration(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> boo
 }
 
 fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-    fn blocol(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if Bloco(lista, token, pos) {
-            return true;
-        } else {
-            return true;
-        }
-    }
-
     fn CMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if is_declaration(lista, token, pos) {
-            if blocol(lista, token, pos) {
-                return true;
-            } else {
-                return false;
-            }
+        if is_if(lista, token, pos) {
+            return true;
+        } else if is_declaration(lista, token, pos) {
+            return true;
         } else if is_atribuicao(lista, token, pos) {
-            if blocol(lista, token, pos) {
-                return true;
-            } else {
-                return false;
-            }
-        } else if ReturnCMD(lista, token, pos) {
-            if blocol(lista, token, pos) {
-                return true;
-            } else {
-                return false;
-            }
-        } else if is_if(lista, token, pos) {
-            if blocol(lista, token, pos) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-
-    fn Bloco(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if CMD(lista, token, pos) {
+            return true;
+        } else if Return(lista, token, pos) {
             return true;
         } else {
             return false;
         }
     }
+
+    fn if_block(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.tipe == "}" {
+            return true;
+        }
+        if CMD(lista, token, pos) {
+            return if_block(lista, token, pos);
+        } else {
+            return false;
+        }
+    }
+
     fn is_valid_comparated(token: &mut Token) -> bool {
         match token.tipe.as_str() {
             "Floating_Point" => true,
@@ -610,7 +671,7 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
             return true;
         } else if (token.lexeme == "{") {
             next_token(lista, pos, token);
-            if Bloco(&lista, token, pos) {
+            if if_block(&lista, token, pos) {
                 if (token.lexeme == "}") {
                     next_token(lista, pos, token);
                     return true;
@@ -646,7 +707,7 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                     next_token(lista, pos, token);
                     if token.lexeme == "{" {
                         next_token(lista, pos, token);
-                        if Bloco(&lista, token, pos) {
+                        if if_block(&lista, token, pos) {
                             if token.lexeme == "}" {
                                 next_token(lista, pos, token);
                                 if is_else(&lista, token, pos) {
@@ -671,35 +732,47 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
             }
         } else {
             return false;
-        };
+        }
     } else {
         return false;
     }
 }
 
-fn parse(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+fn CMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     if is_if(lista, token, pos) {
         return true;
     } else if is_declaration(lista, token, pos) {
         return true;
     } else if is_atribuicao(lista, token, pos) {
         return true;
+    } else if Return(lista, token, pos) {
+        return true;
     } else {
-        erro("if", token);
         return false;
     }
+}
+
+fn bloco(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    if token.tipe == "EOF" {
+        return true;
+    }
+
+    if CMD(lista, token, pos) {
+        return bloco(lista, token, pos);
+    }
+
+    return false;
 }
 
 pub fn parser(lista: Vec<Token>) -> bool {
     let mut pos: usize = 0;
     let mut token: Token = Token::new("", "");
     next_token(&lista, &mut pos, &mut token);
-    let mut result: bool = false;
-    while token.tipe != "EOF" {
-        result = parse(&lista, &mut token, &mut pos);
-        if !result {
-            break;
-        }
+    let result: bool = bloco(&lista, &mut token, &mut pos);
+
+    if result {
+        return true;
+    } else {
+        return false;
     }
-    return result;
 }
