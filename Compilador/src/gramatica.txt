@@ -1,5 +1,6 @@
 GRAMATICA
 
+
 Regra Bloco:
 S -> BLOCO
 BLOCO -> CMD BL
@@ -50,6 +51,10 @@ ATB_TYPE -> '+=' | '-=' | '*=' | '/=' | '='
 SIMP_OP -> '++' | '--'
 
 Regra if:
+
+
+COND -> EXP_COMP LINKER
+LINKER -> && COND | || COND
 
 IF -> 'if' '(' COND ')' '{' Bloco '}' ELSE
 ELSE -> 'else' ELSEIF | e

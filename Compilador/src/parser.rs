@@ -376,6 +376,10 @@ fn FUNC(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
             return true;
         } else if Return(lista, token, pos) {
             return true;
+        } else if println(lista, token, pos) {
+            return true;
+        } else if scanln(lista, token, pos) {
+            return true;
         } else {
             return false;
         }
@@ -498,13 +502,17 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
             return true;
         } else if Return(lista, token, pos) {
             return true;
+        } else if println(lista, token, pos) {
+            return true;
+        } else if scanln(lista, token, pos) {
+            return true;
         } else {
             return false;
         }
     }
 
     fn if_block(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if token.tipe == "}" {
+        if token.lexeme == "}" {
             return true;
         }
         if CMD(lista, token, pos) {
@@ -698,7 +706,7 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                     next_token(lista, pos, token);
                     if token.lexeme == "{" {
                         next_token(lista, pos, token);
-                        if if_block(&lista, token, pos) {
+                        if if_block(lista, token, pos) {
                             if token.lexeme == "}" {
                                 next_token(lista, pos, token);
                                 if is_else(&lista, token, pos) {
@@ -707,6 +715,7 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                                     return false;
                                 }
                             } else {
+                                erro("missing cloasing brackets", token);
                                 return false;
                             }
                         } else {
@@ -729,6 +738,176 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     }
 }
 
+fn scanln(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    if token.tipe == "Reserved_scanln" {
+        next_token(lista, pos, token);
+        if token.lexeme == "(" {
+            next_token(lista, pos, token);
+            if token.tipe == "ID" {
+                next_token(lista, pos, token);
+                if token.lexeme == ")" {
+                    next_token(lista, pos, token);
+                    if token.lexeme == ";" {
+                        next_token(lista, pos, token);
+                        return true;
+                    } else {
+                        erro("scanln missing end of operation ';'", token);
+                        return false;
+                    }
+                } else {
+                    erro("scanln missing closing ')'", token);
+                    return false;
+                }
+            } else {
+                erro("scanln missing ID to scan", token);
+                return false;
+            }
+        } else {
+            erro("scanln missing opening '('", token);
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
+fn println(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    fn vars(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.lexeme == "," {
+            next_token(lista, pos, token);
+            if token.tipe == "ID" {
+                next_token(lista, pos, token);
+                if vars(lista, token, pos) {
+                    return true;
+                }
+            } else {
+                erro("println variable missing name", token);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    if token.tipe == "Reserved_println" {
+        next_token(lista, pos, token);
+        if token.lexeme == "(" {
+            next_token(lista, pos, token);
+            if token.tipe == "string" {
+                next_token(lista, pos, token);
+                if vars(lista, token, pos) {
+                    if token.lexeme == ")" {
+                        next_token(lista, pos, token);
+                        if token.lexeme == ";" {
+                            next_token(lista, pos, token);
+                            return true;
+                        } else {
+                            erro("println missing end of operation ';'", token);
+                            return false;
+                        }
+                    } else {
+                        erro("println missing closing ')'", token);
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            } else {
+                erro("println missing content", token);
+                return false;
+            }
+        } else {
+            erro("println missing opening '('", token);
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
+fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    fn OU_PARL(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.lexeme == "|" {
+            next_token(lista, pos, token);
+            if token.lexeme == "|" {
+                next_token(lista, pos, token);
+                if E_PAR(lista, token, pos) {
+                    if OU_PARL(lista, token, pos) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            } else {
+                erro("'OR' parameter missing second '|'", token);
+                return false;
+            }
+        } else {
+            return true;
+        }
+    }
+
+    fn OU_PAR(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if E_PAR(lista, token, pos) {
+            if OU_PARL(lista, token, pos) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    fn WPARAMETERS(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if OU_PAR(lista, token, pos) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    if token.tipe == "Reserved_while" {
+        next_token(lista, pos, token);
+        if token.lexeme == "(" {
+            next_token(lista, pos, token);
+            if WPARAMETERS(lista, token, pos) {
+                if token.lexeme == ")" {
+                    next_token(lista, pos, token);
+                    if token.lexeme == "{" {
+                        next_token(lista, pos, token);
+                        if while_block(lista, token, pos) {
+                            if token.lexeme == "}" {
+                                next_token(lista, pos, token);
+                                return true;
+                            } else {
+                                erro("while missing closing '}'", token);
+                                return false;
+                            }
+                        } else {
+                            return false;
+                        }
+                    } else {
+                        erro("while missing opening '{'", token);
+                        return false;
+                    }
+                } else {
+                    erro("while missing closing ')'", token);
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            erro("while missing opening '('", token);
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
 fn CMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     if is_if(lista, token, pos) {
         return true;
@@ -737,6 +916,10 @@ fn CMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     } else if is_atribuicao(lista, token, pos) {
         return true;
     } else if Return(lista, token, pos) {
+        return true;
+    } else if println(lista, token, pos) {
+        return true;
+    } else if scanln(lista, token, pos) {
         return true;
     } else {
         return false;
