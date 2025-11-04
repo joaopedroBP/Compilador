@@ -321,28 +321,19 @@ fn VAR(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
 
 fn FUNC(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     fn PARAMETER_TYPE(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if is_operation(lista, token, pos) {
-            return true;
-        } else if token.tipe == "Floating_Point" {
+        if token.tipe == "Reserved_FLOAT" {
             next_token(lista, pos, token);
             return true;
-        } else if token.tipe == "Integer" {
+        } else if token.tipe == "Reserved_INT" {
             next_token(lista, pos, token);
             return true;
-        } else if token.tipe == "character" {
+        } else if token.tipe == "Reserved_CHAR" {
             next_token(lista, pos, token);
             return true;
-        } else if token.tipe == "ID" {
-            next_token(lista, pos, token);
-            return true;
-        } else if token.tipe == "Reserved_TRUE" {
-            next_token(lista, pos, token);
-            return true;
-        } else if token.tipe == "Reserved_FALSE" {
+        } else if token.tipe == "Reserved_BOOL" {
             next_token(lista, pos, token);
             return true;
         } else {
-            erro("Missing proper declaration atribution", token);
             return false;
         }
     }
@@ -391,7 +382,7 @@ fn FUNC(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     }
 
     fn func_block(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if token.tipe == "}" {
+        if token.lexeme == "}" {
             return true;
         }
         if CMD(lista, token, pos) {
@@ -401,7 +392,7 @@ fn FUNC(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         }
     }
 
-    if token.tipe == "Reserved_function" {
+    if token.lexeme == "function" {
         next_token(lista, pos, token);
         if token.tipe == "ID" {
             next_token(lista, pos, token);
