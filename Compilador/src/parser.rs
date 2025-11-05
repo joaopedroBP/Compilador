@@ -150,25 +150,17 @@ fn VAR_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     fn COMP_OPTION(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if is_operation(lista, token, pos) {
             return true;
+        } else if FUNC_CALL(lista, token, pos) {
+            return true;
         } else if token.tipe == "Floating_Point"
             || token.tipe == "Integer"
             || token.tipe == "character"
             || token.tipe == "Reserved_TRUE"
             || token.tipe == "Reserved_FALSE"
+            || token.tipe == "ID"
         {
             next_token(lista, pos, token);
             return true;
-        } else if token.tipe == "ID" {
-            next_token(lista, pos, token);
-            if token.lexeme == "(" {
-                if FUNC_CALL(lista, token, pos) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return true;
-            }
         } else {
             return false;
         }
@@ -253,37 +245,36 @@ fn FUNC_CALL(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         }
         return true;
     }
-
-    if token.lexeme == "(" {
-        next_token(lista, pos, token);
-        if arguments(lista, token, pos) {
-            if token.lexeme == ")" {
-                next_token(lista, pos, token);
-                return true;
+    if token.tipe == "ID" {
+        if token.lexeme == "(" {
+            next_token(lista, pos, token);
+            if arguments(lista, token, pos) {
+                if token.lexeme == ")" {
+                    next_token(lista, pos, token);
+                    return true;
+                } else {
+                    return false;
+                }
             } else {
                 return false;
             }
-        } else {
-            return false;
         }
+        return false;
+    } else {
+        return true;
     }
-    return false;
 }
 
 fn is_atribuicao_interna(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-    fn ATB_KIND(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    if token.tipe == "ID" {
+        next_token(lista, pos, token);
         if VAR_ATB(lista, token, pos) {
-            return true;
-        } else if FUNC_CALL(lista, token, pos) {
             return true;
         } else {
             return false;
         }
-    }
-
-    if token.tipe == "ID" {
-        next_token(lista, pos, token);
-        if ATB_KIND(lista, token, pos) {
+    } else if token.tipe == "Reserved_call" {
+        if FUNC_CALL(lista, token, pos) {
             return true;
         } else {
             return false;

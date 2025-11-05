@@ -111,6 +111,7 @@ fn is_token_separator(code: char) -> bool {
 
 fn is_reserved_name(code: &str) -> Token {
     match code {
+        "call" => Token::new("Reserved_call", "call"),
         "println" => Token::new("Reserved_println", "println"),
         "function" => Token::new("Reserved_function", "function"),
         "INT" => Token::new("Reserved_INT", "INT"),
