@@ -153,12 +153,22 @@ fn VAR_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         } else if token.tipe == "Floating_Point"
             || token.tipe == "Integer"
             || token.tipe == "character"
-            || token.tipe == "ID"
             || token.tipe == "Reserved_TRUE"
             || token.tipe == "Reserved_FALSE"
         {
             next_token(lista, pos, token);
             return true;
+        } else if token.tipe == "ID" {
+            next_token(lista, pos, token);
+            if token.lexeme == "(" {
+                if FUNC_CALL(lista, token, pos) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
         } else {
             return false;
         }
@@ -207,6 +217,21 @@ fn VAR_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
 }
 
 fn FUNC_CALL(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    fn argument_type(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.tipe == "Floating_Point"
+            || token.tipe == "Integer"
+            || token.tipe == "character"
+            || token.tipe == "ID"
+            || token.tipe == "Reserved_TRUE"
+            || token.tipe == "Reserved_FALSE"
+        {
+            next_token(lista, pos, token);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     fn args(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if token.lexeme == "," {
             next_token(lista, pos, token);
@@ -215,21 +240,18 @@ fn FUNC_CALL(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
             } else {
                 return false;
             }
-        } else {
-            return true;
         }
+        return true;
     }
     fn arguments(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if token.tipe == "ID" {
-            next_token(lista, pos, token);
+        if argument_type(lista, token, pos) {
             if args(lista, token, pos) {
                 return true;
             } else {
                 return false;
             }
-        } else {
-            return true;
         }
+        return true;
     }
 
     if token.lexeme == "(" {
@@ -248,7 +270,7 @@ fn FUNC_CALL(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     return false;
 }
 
-fn is_atribuicao(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+fn is_atribuicao_interna(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     fn ATB_KIND(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if VAR_ATB(lista, token, pos) {
             return true;
@@ -264,6 +286,20 @@ fn is_atribuicao(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool
         if ATB_KIND(lista, token, pos) {
             return true;
         } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
+fn is_atribuicao(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    if is_atribuicao_interna(lista, token, pos) {
+        if token.lexeme == ";" {
+            next_token(lista, pos, token);
+            return true;
+        } else {
+            erro("attribution missing end of operation ';'", token);
             return false;
         }
     } else {
@@ -455,24 +491,25 @@ fn VAR(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
     fn DEC_ATB(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
         if is_operation(lista, token, pos) {
             return true;
-        } else if token.tipe == "Floating_Point" {
-            next_token(lista, pos, token);
-            return true;
-        } else if token.tipe == "Integer" {
-            next_token(lista, pos, token);
-            return true;
-        } else if token.tipe == "character" {
+        } else if token.tipe == "Floating_Point"
+            || token.tipe == "Integer"
+            || token.tipe == "character"
+            || token.tipe == "Reserved_TRUE"
+            || token.tipe == "Reserved_FALSE"
+        {
             next_token(lista, pos, token);
             return true;
         } else if token.tipe == "ID" {
             next_token(lista, pos, token);
-            return true;
-        } else if token.tipe == "Reserved_TRUE" {
-            next_token(lista, pos, token);
-            return true;
-        } else if token.tipe == "Reserved_FALSE" {
-            next_token(lista, pos, token);
-            return true;
+            if token.lexeme == "(" {
+                if FUNC_CALL(lista, token, pos) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
         } else {
             erro("Missing proper declaration atribution", token);
             return false;
@@ -1180,7 +1217,7 @@ fn is_for(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                 if COMPARATION(lista, token, pos) {
                     if token.lexeme == ";" {
                         next_token(lista, pos, token);
-                        if is_atribuicao(lista, token, pos) {
+                        if is_atribuicao_interna(lista, token, pos) {
                             if token.lexeme == ")" {
                                 next_token(lista, pos, token);
                                 if token.lexeme == "{" {
