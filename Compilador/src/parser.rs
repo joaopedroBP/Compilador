@@ -217,113 +217,23 @@ fn is_atribuicao(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool
         }
     }
 
-    if token.tipe == "ID" {
-        next_token(lista, pos, token);
-        if OP_ATB(lista, token, pos) {
-            if token.lexeme == ";" {
-                next_token(lista, pos, token);
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    } else {
-        return false;
-    }
-}
-
-fn is_atribuicao_interna(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-    fn SIMP_OP(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if token.lexeme == "+" {
-            let mut aux_pos: usize = *pos + 1;
-            if lista[aux_pos].lexeme == "+" {
-                next_token(lista, pos, token);
-                next_token(lista, pos, token);
-                return true;
-            } else {
-                return false;
-            }
-        } else if token.lexeme == "-" {
-            let mut aux_pos: usize = *pos + 1;
-            if lista[aux_pos].lexeme == "-" {
-                next_token(lista, pos, token);
-                next_token(lista, pos, token);
-                return true;
-            } else {
-                return true;
-            }
-        } else {
-            return false;
-        }
-    }
-
-    fn COMP_OPTION(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if is_operation(lista, token, pos) {
-            return true;
-        } else if token.tipe == "Floating_Point" {
-            next_token(lista, pos, token);
-            return true;
-        } else if token.tipe == "Integer" {
-            next_token(lista, pos, token);
-            return true;
-        } else if token.tipe == "character" {
-            next_token(lista, pos, token);
-            return true;
-        } else if token.tipe == "ID" {
-            next_token(lista, pos, token);
-            return true;
-        } else if token.tipe == "Reserved_TRUE" {
-            next_token(lista, pos, token);
-            return true;
-        } else if token.tipe == "Reserved_FALSE" {
+    fn closing(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.lexeme == ";" {
             next_token(lista, pos, token);
             return true;
         } else {
-            return false;
-        }
-    }
-
-    fn COMP_OP(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if token.lexeme == "+" || token.lexeme == "-" || token.lexeme == "*" || token.lexeme == "/"
-        {
-            next_token(lista, pos, token);
-            if token.lexeme == "=" {
-                next_token(lista, pos, token);
-                if COMP_OPTION(lista, token, pos) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        } else if token.lexeme == "=" {
-            next_token(lista, pos, token);
-            if COMP_OPTION(lista, token, pos) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-    fn OP_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if SIMP_OP(lista, token, pos) {
             return true;
-        } else if COMP_OP(lista, token, pos) {
-            return true;
-        } else {
-            return false;
         }
     }
 
     if token.tipe == "ID" {
         next_token(lista, pos, token);
         if OP_ATB(lista, token, pos) {
-            return true;
+            if closing(lista, token, pos) {
+                return true;
+            } else {
+                return false;
+            }
         } else {
             return false;
         }
@@ -1241,7 +1151,7 @@ fn is_for(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                 if COMPARATION(lista, token, pos) {
                     if token.lexeme == ";" {
                         next_token(lista, pos, token);
-                        if is_atribuicao_interna(lista, token, pos) {
+                        if is_atribuicao(lista, token, pos) {
                             if token.lexeme == ")" {
                                 next_token(lista, pos, token);
                                 if token.lexeme == "{" {
@@ -1287,10 +1197,75 @@ fn is_for(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     }
 }
 
+fn is_function_call(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    fn args(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.lexeme == "," {
+            next_token(lista, pos, token);
+            if ARGUMENTS(lista, token, pos) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
+        }
+    }
+
+    fn ARGUMENTS(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.tipe == "ID" {
+            next_token(lista, pos, token);
+            if args(lista, token, pos) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
+        }
+    }
+
+    fn closing(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.lexeme == ";" {
+            next_token(lista, pos, token);
+            return true;
+        }
+        return true;
+    }
+
+    if token.tipe == "ID" {
+        let mut aux_pos: usize = *pos + 1;
+        if lista[aux_pos].lexeme == "(" {
+            next_token(lista, pos, token);
+            next_token(lista, pos, token);
+            if ARGUMENTS(lista, token, pos) {
+                if token.lexeme == ")" {
+                    next_token(lista, pos, token);
+                    if closing(lista, token, pos) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    erro("function call missing closing ')'", token);
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
 fn CMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     if is_if(lista, token, pos) {
         return true;
     } else if is_declaration(lista, token, pos) {
+        return true;
+    } else if is_function_call(lista, token, pos) {
         return true;
     } else if is_atribuicao(lista, token, pos) {
         return true;
