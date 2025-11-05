@@ -15,6 +15,76 @@ fn next_token(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) {
     *pos += 1;
 }
 
+fn Continue(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    if token.lexeme == "continue" {
+        next_token(lista, pos, token);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+fn Break(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    if token.lexeme == "break" {
+        next_token(lista, pos, token);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+fn is_valid_comparated(token: &mut Token) -> bool {
+    match token.tipe.as_str() {
+        "Floating_Point" => true,
+        "Integer" => true,
+        "Reserved_TRUE" => true,
+        "Reserved_FALSE" => true,
+        "ID" => true,
+        _ => false,
+    }
+}
+
+fn OP_COMP(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    if token.lexeme == ">" || token.lexeme == "<" {
+        next_token(lista, pos, token);
+        if token.lexeme == "=" {
+            return true;
+        } else {
+            return true;
+        }
+    } else if token.lexeme == "!" || token.lexeme == "=" {
+        next_token(lista, pos, token);
+        if token.lexeme == "=" {
+            next_token(lista, pos, token);
+            return true;
+        } else {
+            erro("Invalid conparator used", token);
+            return false;
+        }
+    } else {
+        erro("Invalid conparator used", token);
+        return false;
+    }
+}
+
+fn COMPARATION(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    if is_valid_comparated(token) {
+        next_token(lista, pos, token);
+        if OP_COMP(&lista, token, pos) {
+            if is_valid_comparated(token) {
+                next_token(lista, pos, token);
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
 fn return_type(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     if token.tipe == "Floating_Point" {
         next_token(lista, pos, token);
@@ -154,6 +224,104 @@ fn is_atribuicao(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool
             } else {
                 return false;
             }
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
+fn is_atribuicao_interna(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    fn SIMP_OP(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.lexeme == "+" {
+            let mut aux_pos: usize = *pos + 1;
+            if lista[aux_pos].lexeme == "+" {
+                next_token(lista, pos, token);
+                next_token(lista, pos, token);
+                return true;
+            } else {
+                return false;
+            }
+        } else if token.lexeme == "-" {
+            let mut aux_pos: usize = *pos + 1;
+            if lista[aux_pos].lexeme == "-" {
+                next_token(lista, pos, token);
+                next_token(lista, pos, token);
+                return true;
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    fn COMP_OPTION(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if is_operation(lista, token, pos) {
+            return true;
+        } else if token.tipe == "Floating_Point" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "Integer" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "character" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "ID" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "Reserved_TRUE" {
+            next_token(lista, pos, token);
+            return true;
+        } else if token.tipe == "Reserved_FALSE" {
+            next_token(lista, pos, token);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    fn COMP_OP(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.lexeme == "+" || token.lexeme == "-" || token.lexeme == "*" || token.lexeme == "/"
+        {
+            next_token(lista, pos, token);
+            if token.lexeme == "=" {
+                next_token(lista, pos, token);
+                if COMP_OPTION(lista, token, pos) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else if token.lexeme == "=" {
+            next_token(lista, pos, token);
+            if COMP_OPTION(lista, token, pos) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+    fn OP_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if SIMP_OP(lista, token, pos) {
+            return true;
+        } else if COMP_OP(lista, token, pos) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    if token.tipe == "ID" {
+        next_token(lista, pos, token);
+        if OP_ATB(lista, token, pos) {
+            return true;
         } else {
             return false;
         }
@@ -380,6 +548,14 @@ fn FUNC(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
             return true;
         } else if scanln(lista, token, pos) {
             return true;
+        } else if is_while(lista, token, pos) {
+            return true;
+        } else if Continue(lista, token, pos) {
+            return true;
+        } else if Break(lista, token, pos) {
+            return true;
+        } else if is_for(lista, token, pos) {
+            return true;
         } else {
             return false;
         }
@@ -506,6 +682,14 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
             return true;
         } else if scanln(lista, token, pos) {
             return true;
+        } else if is_while(lista, token, pos) {
+            return true;
+        } else if Continue(lista, token, pos) {
+            return true;
+        } else if Break(lista, token, pos) {
+            return true;
+        } else if is_for(lista, token, pos) {
+            return true;
         } else {
             return false;
         }
@@ -522,79 +706,12 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         }
     }
 
-    fn is_valid_comparated(token: &mut Token) -> bool {
-        match token.tipe.as_str() {
-            "Floating_Point" => true,
-            "Integer" => true,
-            "Reserved_TRUE" => true,
-            "Reserved_FALSE" => true,
-            "ID" => true,
-            _ => false,
-        }
-    }
-
-    fn OP_COMP(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if token.lexeme == ">" {
-            next_token(lista, pos, token);
-            if token.lexeme == "=" {
-                next_token(lista, pos, token);
-                return true;
-            } else {
-                return true;
-            }
-        } else if token.lexeme == "<" {
-            next_token(lista, pos, token);
-            if token.lexeme == "=" {
-                next_token(lista, pos, token);
-                return true;
-            } else {
-                return true;
-            }
-        } else if token.lexeme == "!" {
-            next_token(lista, pos, token);
-            if token.lexeme == "=" {
-                next_token(lista, pos, token);
-                return true;
-            } else {
-                return false;
-            }
-        } else if token.lexeme == "=" {
-            next_token(lista, pos, token);
-            if token.lexeme == "=" {
-                next_token(lista, pos, token);
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-
-    fn EXP_COMP(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if is_valid_comparated(token) {
-            next_token(lista, pos, token);
-            if OP_COMP(&lista, token, pos) {
-                if is_valid_comparated(token) {
-                    next_token(lista, pos, token);
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-
     fn EXP_EL(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if (token.lexeme == "&") {
             next_token(lista, pos, token);
             if (token.lexeme == "&") {
                 next_token(lista, pos, token);
-                if EXP_COMP(lista, token, pos) {
+                if COMPARATION(lista, token, pos) {
                     if EXP_EL(lista, token, pos) {
                         return true;
                     } else {
@@ -612,7 +729,7 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     }
 
     fn EXP_E(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if EXP_COMP(lista, token, pos) {
+        if COMPARATION(lista, token, pos) {
             if EXP_EL(&lista, token, pos) {
                 return true;
             } else {
@@ -825,6 +942,77 @@ fn println(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
 }
 
 fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    fn CMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if is_if(lista, token, pos) {
+            return true;
+        } else if is_declaration(lista, token, pos) {
+            return true;
+        } else if is_atribuicao(lista, token, pos) {
+            return true;
+        } else if Return(lista, token, pos) {
+            return true;
+        } else if println(lista, token, pos) {
+            return true;
+        } else if scanln(lista, token, pos) {
+            return true;
+        } else if is_while(lista, token, pos) {
+            return true;
+        } else if Continue(lista, token, pos) {
+            return true;
+        } else if Break(lista, token, pos) {
+            return true;
+        } else if is_for(lista, token, pos) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    fn while_block(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.lexeme == "}" {
+            return true;
+        }
+        if CMD(lista, token, pos) {
+            return while_block(lista, token, pos);
+        } else {
+            return false;
+        }
+    }
+
+    fn E_PARL(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.lexeme == "&" {
+            next_token(lista, pos, token);
+            if token.lexeme == "&" {
+                next_token(lista, pos, token);
+                if COMPARATION(lista, token, pos) {
+                    if E_PARL(lista, token, pos) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return true;
+        }
+    }
+
+    fn E_PAR(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if COMPARATION(lista, token, pos) {
+            if E_PARL(lista, token, pos) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
     fn OU_PARL(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if token.lexeme == "|" {
             next_token(lista, pos, token);
@@ -861,7 +1049,10 @@ fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     }
 
     fn WPARAMETERS(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if OU_PAR(lista, token, pos) {
+        if token.tipe == "Reserved_TRUE" {
+            next_token(lista, pos, token);
+            return true;
+        } else if OU_PAR(lista, token, pos) {
             return true;
         } else {
             return false;
@@ -908,6 +1099,115 @@ fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     }
 }
 
+fn is_for(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    fn CMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if is_if(lista, token, pos) {
+            return true;
+        } else if is_declaration(lista, token, pos) {
+            return true;
+        } else if is_atribuicao(lista, token, pos) {
+            return true;
+        } else if Return(lista, token, pos) {
+            return true;
+        } else if println(lista, token, pos) {
+            return true;
+        } else if scanln(lista, token, pos) {
+            return true;
+        } else if is_while(lista, token, pos) {
+            return true;
+        } else if Continue(lista, token, pos) {
+            return true;
+        } else if Break(lista, token, pos) {
+            return true;
+        } else if is_for(lista, token, pos) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    fn for_block(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.lexeme == "}" {
+            return true;
+        }
+        if CMD(lista, token, pos) {
+            return for_block(lista, token, pos);
+        } else {
+            return false;
+        }
+    }
+
+    fn COMPARATOR(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if is_declaration(lista, token, pos) {
+            return true;
+        } else if token.tipe == "ID" {
+            next_token(lista, pos, token);
+            if token.lexeme == ";" {
+                next_token(lista, pos, token);
+                return true;
+            } else {
+                erro("for loop ID comparator missing end of operation ';'", token);
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    if token.tipe == "Reserved_for" {
+        next_token(lista, pos, token);
+        if token.lexeme == "(" {
+            next_token(lista, pos, token);
+            if COMPARATOR(lista, token, pos) {
+                if COMPARATION(lista, token, pos) {
+                    if token.lexeme == ";" {
+                        next_token(lista, pos, token);
+                        if is_atribuicao_interna(lista, token, pos) {
+                            if token.lexeme == ")" {
+                                next_token(lista, pos, token);
+                                if token.lexeme == "{" {
+                                    next_token(lista, pos, token);
+                                    if for_block(lista, token, pos) {
+                                        if token.lexeme == "}" {
+                                            next_token(lista, pos, token);
+                                            return true;
+                                        } else {
+                                            erro("For loop body missing closing '}'", token);
+                                            return false;
+                                        }
+                                    } else {
+                                        return false;
+                                    }
+                                } else {
+                                    erro("For loop body missing opening '}'", token);
+                                    return false;
+                                }
+                            } else {
+                                erro("For loop missing closing ')'", token);
+                                return false;
+                            }
+                        } else {
+                            return false;
+                        }
+                    } else {
+                        erro("For loop missing ';' on condition", token);
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            erro("For loop missing openign '('", token);
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
 fn CMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     if is_if(lista, token, pos) {
         return true;
@@ -920,6 +1220,14 @@ fn CMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     } else if println(lista, token, pos) {
         return true;
     } else if scanln(lista, token, pos) {
+        return true;
+    } else if is_while(lista, token, pos) {
+        return true;
+    } else if Continue(lista, token, pos) {
+        return true;
+    } else if Break(lista, token, pos) {
+        return true;
+    } else if is_for(lista, token, pos) {
         return true;
     } else {
         return false;
