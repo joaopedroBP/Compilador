@@ -12,6 +12,8 @@ fn erro(regra: &str, token_atual: &mut Token) {
 fn next_token(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) {
     token.tipe = lista.get(*pos).unwrap().tipe.clone();
     token.lexeme = lista.get(*pos).unwrap().lexeme.clone();
+    token.linha = lista.get(*pos).unwrap().linha;
+    token.coluna = lista.get(*pos).unwrap().coluna;
     *pos += 1;
 }
 
@@ -435,6 +437,81 @@ fn is_operation(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool 
     }
 }
 
+fn Main(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    fn CMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if is_if(lista, token, pos) {
+            return true;
+        } else if is_declaration(lista, token, pos) {
+            return true;
+        } else if is_atribuicao(lista, token, pos) {
+            return true;
+        } else if Return(lista, token, pos) {
+            return true;
+        } else if println(lista, token, pos) {
+            return true;
+        } else if scanln(lista, token, pos) {
+            return true;
+        } else if is_while(lista, token, pos) {
+            return true;
+        } else if Continue(lista, token, pos) {
+            return true;
+        } else if Break(lista, token, pos) {
+            return true;
+        } else if is_for(lista, token, pos) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    fn main_block(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+        if token.tipe == "}" {
+            return true;
+        }
+
+        if CMD(lista, token, pos) {
+            return main_block(lista, token, pos);
+        }
+
+        return false;
+    }
+
+    if token.lexeme == "main" {
+        next_token(lista, pos, token);
+        if token.lexeme == "(" {
+            next_token(lista, pos, token);
+            if token.lexeme == ")" {
+                next_token(lista, pos, token);
+                if token.lexeme == "{" {
+                    next_token(lista, pos, token);
+                    if main_block(lista, token, pos) {
+                        if token.lexeme == "}" {
+                            next_token(lista, pos, token);
+                            return true;
+                        } else {
+                            erro("main function body missing closing '}'", token);
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                } else {
+                    erro("main function body missing opening '{", token);
+                    return false;
+                }
+            } else {
+                erro("main function missing closing ')", token);
+                return false;
+            }
+        } else {
+            erro("main functiom missing opening '('", token);
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
+
 fn VAR(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
     fn DEC_ATB(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
         if is_operation(lista, token, pos) {
@@ -641,7 +718,9 @@ fn is_declaration(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> boo
     }
 
     fn DECLARATION(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
-        if VAR(lista, pos, token) {
+        if Main(lista, token, pos) {
+            return true;
+        } else if VAR(lista, pos, token) {
             return true;
         } else if FUNC(lista, token, pos) {
             return true;

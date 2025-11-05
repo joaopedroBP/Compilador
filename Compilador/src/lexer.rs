@@ -20,7 +20,7 @@ impl Token {
 
     pub fn to_string(&self) -> String {
         format!(
-            "< {} , {} > line: {}, coluna:{}",
+            "< {} , {} > linha: {}, coluna:{}",
             self.tipe, self.lexeme, self.linha, self.coluna
         )
     }

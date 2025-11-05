@@ -1,6 +1,5 @@
 GRAMATICA
 
-
 Regra Bloco:
 S -> BLOCO
 BLOCO -> CMD BL
@@ -52,10 +51,6 @@ SIMP_OP -> '++' | '--'
 
 Regra if:
 
-
-COND -> EXP_COMP LINKER
-LINKER -> && COND | || COND
-
 IF -> 'if' '(' COND ')' '{' Bloco '}' ELSE
 ELSE -> 'else' ELSEIF | e
 ELSEIF -> IF | '{' Bloco '}'
@@ -66,15 +61,6 @@ EXP_E -> EXP_COMP EXP_EL
 EXP_EL -> '&&' EXP_COMP EXP_EL
 EXP_COMP -> (ID|NUM|TRUE|FALSE|OPERATION|FUNC_CALL_IMP) ( OP_COMP ) (ID|NUM|TRUE|FALSE|OPERATION|FUNC_CALL_IMP)
 OP_COMP -> '>' | '<' | '<' '=' | '>''=' | '=''=' | '!''='  
-
-Regra function:
-
-FUNC ->  FUNC_TYPE ':' 'function' ID '(' PARAMETER ')' '{' Bloco RETORNO '}'
-FUNC_TYPE -> 'INT' | 'FLOAT' | 'VOID' | 'BOOL' | 'CHAR'
-TYPE -> INT | FLOAT | BOOL | CHAR
-PARAMETER -> TYPE ':' ID PARAMS | e
-PARAMS -> ',' PARAMETER| e
-RETORNO -> 'return' (ID | integer | floating_point | char | bool) ';' | e
 
 Regra while:
 
