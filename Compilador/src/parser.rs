@@ -465,7 +465,7 @@ fn Main(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     }
 
     fn main_block(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if token.tipe == "}" {
+        if token.lexeme == "}" {
             return true;
         }
 
