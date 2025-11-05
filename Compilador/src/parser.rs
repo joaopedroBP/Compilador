@@ -150,8 +150,13 @@ fn VAR_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     fn COMP_OPTION(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if is_operation(lista, token, pos) {
             return true;
-        } else if FUNC_CALL(lista, token, pos) {
-            return true;
+        } else if token.tipe == "Reserved_call" {
+            next_token(lista, pos, token);
+            if FUNC_CALL(lista, token, pos) {
+                return true;
+            } else {
+                return false;
+            }
         } else if token.tipe == "Floating_Point"
             || token.tipe == "Integer"
             || token.tipe == "character"
@@ -246,6 +251,7 @@ fn FUNC_CALL(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         return true;
     }
     if token.tipe == "ID" {
+        next_token(lista, pos, token);
         if token.lexeme == "(" {
             next_token(lista, pos, token);
             if arguments(lista, token, pos) {
@@ -261,7 +267,7 @@ fn FUNC_CALL(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         }
         return false;
     } else {
-        return true;
+        return false;
     }
 }
 
@@ -274,6 +280,7 @@ fn is_atribuicao_interna(lista: &Vec<Token>, token: &mut Token, pos: &mut usize)
             return false;
         }
     } else if token.tipe == "Reserved_call" {
+        next_token(lista, pos, token);
         if FUNC_CALL(lista, token, pos) {
             return true;
         } else {
@@ -482,25 +489,22 @@ fn VAR(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
     fn DEC_ATB(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
         if is_operation(lista, token, pos) {
             return true;
+        } else if token.tipe == "Reserved_call" {
+            next_token(lista, pos, token);
+            if FUNC_CALL(lista, token, pos) {
+                return true;
+            } else {
+                return false;
+            }
         } else if token.tipe == "Floating_Point"
             || token.tipe == "Integer"
             || token.tipe == "character"
             || token.tipe == "Reserved_TRUE"
             || token.tipe == "Reserved_FALSE"
+            || token.tipe == "ID"
         {
             next_token(lista, pos, token);
             return true;
-        } else if token.tipe == "ID" {
-            next_token(lista, pos, token);
-            if token.lexeme == "(" {
-                if FUNC_CALL(lista, token, pos) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return true;
-            }
         } else {
             erro("Missing proper declaration atribution", token);
             return false;
