@@ -689,7 +689,7 @@ fn is_declaration(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> boo
     fn DEC_TYPE(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if token.tipe == "Reserved_FLOAT"
             || token.tipe == "Reserved_INT"
-            || token.tipe == "Reserved CHAR"
+            || token.tipe == "Reserved_CHAR"
             || token.tipe == "Reserved_BOOL"
             || token.tipe == "Reserved_VOID"
         {
@@ -1017,27 +1017,20 @@ fn println(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
 
 fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     fn CMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if is_if(lista, token, pos) {
-            return true;
-        } else if is_declaration(lista, token, pos) {
-            return true;
-        } else if is_atribuicao(lista, token, pos) {
-            return true;
-        } else if Return(lista, token, pos) {
-            return true;
-        } else if println(lista, token, pos) {
-            return true;
-        } else if scanln(lista, token, pos) {
-            return true;
-        } else if is_while(lista, token, pos) {
-            return true;
-        } else if Continue(lista, token, pos) {
-            return true;
-        } else if Break(lista, token, pos) {
-            return true;
-        } else if is_for(lista, token, pos) {
+        if is_if(lista, token, pos)
+            || is_declaration(lista, token, pos)
+            || is_atribuicao(lista, token, pos)
+            || Return(lista, token, pos)
+            || println(lista, token, pos)
+            || scanln(lista, token, pos)
+            || is_while(lista, token, pos)
+            || Continue(lista, token, pos)
+            || Break(lista, token, pos)
+            || is_for(lista, token, pos)
+        {
             return true;
         } else {
+            erro("invalid or unexpected command inside while body", token);
             return false;
         }
     }
@@ -1065,9 +1058,11 @@ fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                         return false;
                     }
                 } else {
+                    erro("invalid comparison after '&&'", token);
                     return false;
                 }
             } else {
+                erro("missing second '&' in '&&' operator", token);
                 return false;
             }
         } else {
@@ -1083,6 +1078,7 @@ fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                 return false;
             }
         } else {
+            erro("invalid comparation sexpression in while condition", token);
             return false;
         }
     }
@@ -1099,10 +1095,11 @@ fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                         return false;
                     }
                 } else {
+                    erro("invalid expression after '||'", token);
                     return false;
                 }
             } else {
-                erro("'OR' parameter missing second '|'", token);
+                erro("missing second '|' in '||' operator", token);
                 return false;
             }
         } else {
@@ -1118,6 +1115,7 @@ fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                 return false;
             }
         } else {
+            erro("invalid logical OR expression in while condition", token);
             return false;
         }
     }
@@ -1147,25 +1145,27 @@ fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                                 next_token(lista, pos, token);
                                 return true;
                             } else {
-                                erro("while missing closing '}'", token);
+                                erro("missing closing '}' in while block", token);
                                 return false;
                             }
                         } else {
+                            erro("invalid command inside while block", token);
                             return false;
                         }
                     } else {
-                        erro("while missing opening '{'", token);
+                        erro("missing opening '{' for while block", token);
                         return false;
                     }
                 } else {
-                    erro("while missing closing ')'", token);
+                    erro("missing closing ')' in while condition", token);
                     return false;
                 }
             } else {
+                erro("invalid condition in while", token);
                 return false;
             }
         } else {
-            erro("while missing opening '('", token);
+            erro("missing opening '(' after while", token);
             return false;
         }
     } else {
@@ -1175,27 +1175,20 @@ fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
 
 fn is_for(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     fn CMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if is_if(lista, token, pos) {
-            return true;
-        } else if is_declaration(lista, token, pos) {
-            return true;
-        } else if is_atribuicao(lista, token, pos) {
-            return true;
-        } else if Return(lista, token, pos) {
-            return true;
-        } else if println(lista, token, pos) {
-            return true;
-        } else if scanln(lista, token, pos) {
-            return true;
-        } else if is_while(lista, token, pos) {
-            return true;
-        } else if Continue(lista, token, pos) {
-            return true;
-        } else if Break(lista, token, pos) {
-            return true;
-        } else if is_for(lista, token, pos) {
+        if is_if(lista, token, pos)
+            || is_declaration(lista, token, pos)
+            || is_atribuicao(lista, token, pos)
+            || Return(lista, token, pos)
+            || println(lista, token, pos)
+            || scanln(lista, token, pos)
+            || is_while(lista, token, pos)
+            || Continue(lista, token, pos)
+            || Break(lista, token, pos)
+            || is_for(lista, token, pos)
+        {
             return true;
         } else {
+            erro("invalid or unexpected command inside if body", token);
             return false;
         }
     }
@@ -1207,6 +1200,7 @@ fn is_for(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if CMD(lista, token, pos) {
             return for_block(lista, token, pos);
         } else {
+            erro("invalid statement inside 'for' block", token);
             return false;
         }
     }
@@ -1220,10 +1214,14 @@ fn is_for(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                 next_token(lista, pos, token);
                 return true;
             } else {
-                erro("for loop ID comparator missing end of operation ';'", token);
+                erro("for loop missing ';' after ID comparator", token);
                 return false;
             }
         } else {
+            erro(
+                "for loop invalid comparator (expected declaration or ID)",
+                token,
+            );
             return false;
         }
     }
@@ -1246,14 +1244,14 @@ fn is_for(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                                             next_token(lista, pos, token);
                                             return true;
                                         } else {
-                                            erro("For loop body missing closing '}'", token);
+                                            erro("for loop body missing closing '}'", token);
                                             return false;
                                         }
                                     } else {
                                         return false;
                                     }
                                 } else {
-                                    erro("For loop body missing opening '}'", token);
+                                    erro("For loop body missing opening '{'", token);
                                     return false;
                                 }
                             } else {
@@ -1261,16 +1259,22 @@ fn is_for(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                                 return false;
                             }
                         } else {
+                            erro("for loop missing increment statement", token);
                             return false;
                         }
                     } else {
-                        erro("For loop missing ';' on condition", token);
+                        erro("For loop missing ';' after condition", token);
                         return false;
                     }
                 } else {
+                    erro("for loop missing condition comparison", token);
                     return false;
                 }
             } else {
+                erro(
+                    "for loop missing initialization (declaration or ID comparator",
+                    token,
+                );
                 return false;
             }
         } else {
