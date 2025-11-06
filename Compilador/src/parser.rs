@@ -1,12 +1,17 @@
 use crate::lexer::Token;
 
 fn erro(regra: &str, token_atual: &mut Token) {
-    println!("{}", regra);
+    println!("==================== ERRO DE SINTAXE ====================");
+    println!("Regra violada : {}", regra);
     println!(
-        "Invalid Token: {}, {} at line:{} columm:{}",
-        token_atual.tipe, token_atual.lexeme, token_atual.linha, token_atual.coluna
+        "Token invalido: < {} , {} >",
+        token_atual.tipe, token_atual.lexeme
     );
-    println!("-------------------------------------");
+    println!(
+        "Localização: LINHA {}, COLUNA {}",
+        token_atual.linha, token_atual.coluna
+    );
+    println!("=========================================================");
 }
 
 fn next_token(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) {
@@ -20,7 +25,12 @@ fn next_token(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) {
 fn Continue(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     if token.lexeme == "continue" {
         next_token(lista, pos, token);
-        return true;
+        if token.lexeme == ";" {
+            next_token(lista, pos, token);
+            return true;
+        } else {
+            return false;
+        }
     } else {
         return false;
     }
@@ -29,7 +39,12 @@ fn Continue(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
 fn Break(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     if token.lexeme == "break" {
         next_token(lista, pos, token);
-        return true;
+        if token.lexeme == ";" {
+            next_token(lista, pos, token);
+            return true;
+        } else {
+            return false;
+        }
     } else {
         return false;
     }
