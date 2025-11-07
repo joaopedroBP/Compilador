@@ -174,7 +174,7 @@ fn VAR_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     fn COMP_OPTION(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if token.tipe == "Reserved_call" {
             next_token(lista, pos, token);
-            if FUNC_CALL(lista, token, pos) {
+            if func_call_interna(lista, token, pos) {
                 return true;
             } else {
                 return false;
@@ -248,7 +248,7 @@ fn VAR_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     }
 }
 
-fn FUNC_CALL(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+fn func_call_interna(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     fn argument_type(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if token.tipe == "Floating_Point"
             || token.tipe == "Integer"
@@ -285,31 +285,38 @@ fn FUNC_CALL(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         }
         return true;
     }
-    if token.tipe == "ID" {
-        next_token(lista, pos, token);
-        if token.lexeme == "(" {
+
+    if token.lexeme == "call" {
+        if token.tipe == "ID" {
             next_token(lista, pos, token);
-            if arguments(lista, token, pos) {
-                if token.lexeme == ")" {
-                    next_token(lista, pos, token);
-                    return true;
+            if token.lexeme == "(" {
+                next_token(lista, pos, token);
+                if arguments(lista, token, pos) {
+                    if token.lexeme == ")" {
+                        next_token(lista, pos, token);
+                        return true;
+                    } else {
+                        erro("missing ')' after function arguments", token);
+                        return false;
+                    }
                 } else {
-                    erro("missing ')' after function arguments", token);
+                    erro("invalid arguments in function call", token);
                     return false;
                 }
             } else {
-                erro("invalid arguments in function call", token);
+                erro("missing '(' after function name", token);
                 return false;
             }
         } else {
-            erro("missing '(' after function name", token);
+            erro("expected function identifier", token);
             return false;
         }
     } else {
-        erro("expected function identifier", token);
         return false;
     }
 }
+
+fn func_call(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) {}
 
 fn is_atribuicao_interna(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     if token.tipe == "ID" {
@@ -318,14 +325,6 @@ fn is_atribuicao_interna(lista: &Vec<Token>, token: &mut Token, pos: &mut usize)
             return true;
         } else {
             erro("invalid variable assignment", token);
-            return false;
-        }
-    } else if token.tipe == "Reserved_call" {
-        next_token(lista, pos, token);
-        if FUNC_CALL(lista, token, pos) {
-            return true;
-        } else {
-            erro("invalid function call in asssignment", token);
             return false;
         }
     } else {
@@ -511,7 +510,7 @@ fn VAR(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
     fn DEC_ATB(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
         if token.tipe == "Reserved_call" {
             next_token(lista, pos, token);
-            if FUNC_CALL(lista, token, pos) {
+            if func_call_interna(lista, token, pos) {
                 return true;
             } else {
                 return false;
@@ -730,6 +729,7 @@ fn is_declaration(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> boo
                 return false;
             }
         } else {
+            erro("declaration missing ':' operator", token);
             return false;
         }
     } else {
