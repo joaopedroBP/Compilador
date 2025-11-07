@@ -186,11 +186,12 @@ fn VAR_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
             || token.tipe == "Reserved_FALSE"
             || token.tipe == "ID"
         {
-            next_token(lista, pos, token);
-            if token.lexeme == "+"
-                || token.lexeme == "-"
-                || token.lexeme == "*"
-                || token.lexeme == "/"
+            let aux_pos: usize = *pos;
+
+            if lista[aux_pos].lexeme == "+"
+                || lista[aux_pos].lexeme == "-"
+                || lista[aux_pos].lexeme == "*"
+                || lista[aux_pos].lexeme == "/"
             {
                 if is_operation(lista, token, pos) {
                     return true;
@@ -198,6 +199,7 @@ fn VAR_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                     return false;
                 }
             }
+            next_token(lista, pos, token);
             return true;
         } else {
             return false;
@@ -507,9 +509,7 @@ fn Main(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
 
 fn VAR(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
     fn DEC_ATB(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
-        if is_operation(lista, token, pos) {
-            return true;
-        } else if token.tipe == "Reserved_call" {
+        if token.tipe == "Reserved_call" {
             next_token(lista, pos, token);
             if FUNC_CALL(lista, token, pos) {
                 return true;
@@ -523,11 +523,12 @@ fn VAR(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
             || token.tipe == "Reserved_FALSE"
             || token.tipe == "ID"
         {
-            next_token(lista, pos, token);
-            if token.lexeme == "+"
-                || token.lexeme == "-"
-                || token.lexeme == "*"
-                || token.lexeme == "/"
+            let aux_pos: usize = *pos;
+
+            if lista[aux_pos].lexeme == "+"
+                || lista[aux_pos].lexeme == "-"
+                || lista[aux_pos].lexeme == "*"
+                || lista[aux_pos].lexeme == "/"
             {
                 if is_operation(lista, token, pos) {
                     return true;
@@ -535,6 +536,7 @@ fn VAR(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
                     return false;
                 }
             }
+            next_token(lista, pos, token);
             return true;
         } else {
             return false;
@@ -710,9 +712,9 @@ fn is_declaration(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> boo
     }
 
     fn DECLARATION(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
-        if VAR(lista, pos, token) {
+        if FUNC(lista, token, pos) {
             return true;
-        } else if FUNC(lista, token, pos) {
+        } else if VAR(lista, pos, token) {
             return true;
         } else {
             return false;
