@@ -22,6 +22,19 @@ fn next_token(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) {
     *pos += 1;
 }
 
+fn Type(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    if token.tipe == "Reserved_FLOAT"
+        || token.tipe == "Reserved_INT"
+        || token.tipe == "Reserved_CHAR"
+        || token.tipe == "Reserved_BOOL"
+        || token.tipe == "Reserved_VOID"
+    {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 fn Continue(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     if token.lexeme == "continue" {
         next_token(lista, pos, token);
@@ -173,7 +186,6 @@ fn VAR_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
 
     fn COMP_OPTION(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if token.tipe == "Reserved_call" {
-            next_token(lista, pos, token);
             if func_call_interna(lista, token, pos) {
                 return true;
             } else {
@@ -287,6 +299,7 @@ fn func_call_interna(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> 
     }
 
     if token.lexeme == "call" {
+        next_token(lista, pos, token);
         if token.tipe == "ID" {
             next_token(lista, pos, token);
             if token.lexeme == "(" {
@@ -316,7 +329,19 @@ fn func_call_interna(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> 
     }
 }
 
-fn func_call(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) {}
+fn func_call(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
+    if func_call_interna(lista, token, pos) {
+        if token.lexeme == ";" {
+            next_token(lista, pos, token);
+            return true;
+        } else {
+            erro("missing ':' after function call", token);
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
 
 fn is_atribuicao_interna(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     if token.tipe == "ID" {
@@ -440,24 +465,6 @@ fn is_operation(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool 
 }
 
 fn Main(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-    fn CMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if is_if(lista, token, pos)
-            || is_declaration(lista, token, pos)
-            || is_atribuicao(lista, token, pos)
-            || Return(lista, token, pos)
-            || println(lista, token, pos)
-            || scanln(lista, token, pos)
-            || is_while(lista, token, pos)
-            || Continue(lista, token, pos)
-            || Break(lista, token, pos)
-            || is_for(lista, token, pos)
-        {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     fn main_block(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if token.lexeme == "}" {
             return true;
@@ -509,7 +516,6 @@ fn Main(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
 fn VAR(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
     fn DEC_ATB(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
         if token.tipe == "Reserved_call" {
-            next_token(lista, pos, token);
             if func_call_interna(lista, token, pos) {
                 return true;
             } else {
@@ -614,24 +620,6 @@ fn FUNC(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         return true;
     }
 
-    fn CMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if is_if(lista, token, pos)
-            || is_declaration(lista, token, pos)
-            || is_atribuicao(lista, token, pos)
-            || Return(lista, token, pos)
-            || println(lista, token, pos)
-            || scanln(lista, token, pos)
-            || is_while(lista, token, pos)
-            || Continue(lista, token, pos)
-            || Break(lista, token, pos)
-            || is_for(lista, token, pos)
-        {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     fn func_block(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if token.lexeme == "}" {
             return true;
@@ -711,8 +699,11 @@ fn is_declaration(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> boo
     }
 
     fn DECLARATION(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
-        if FUNC(lista, token, pos) {
-            return true;
+        if token.lexeme == "function" {
+            if FUNC(lista, token, pos) {
+                return true;
+            }
+            return false;
         } else if VAR(lista, pos, token) {
             return true;
         } else {
@@ -738,24 +729,6 @@ fn is_declaration(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> boo
 }
 
 fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-    fn CMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if is_if(lista, token, pos)
-            || is_declaration(lista, token, pos)
-            || is_atribuicao(lista, token, pos)
-            || Return(lista, token, pos)
-            || println(lista, token, pos)
-            || scanln(lista, token, pos)
-            || is_while(lista, token, pos)
-            || Continue(lista, token, pos)
-            || Break(lista, token, pos)
-            || is_for(lista, token, pos)
-        {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     fn if_block(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if token.lexeme == "}" {
             return true;
@@ -1009,24 +982,6 @@ fn println(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
 }
 
 fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-    fn CMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if is_if(lista, token, pos)
-            || is_declaration(lista, token, pos)
-            || is_atribuicao(lista, token, pos)
-            || Return(lista, token, pos)
-            || println(lista, token, pos)
-            || scanln(lista, token, pos)
-            || is_while(lista, token, pos)
-            || Continue(lista, token, pos)
-            || Break(lista, token, pos)
-            || is_for(lista, token, pos)
-        {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     fn while_block(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if token.lexeme == "}" {
             return true;
@@ -1160,24 +1115,6 @@ fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
 }
 
 fn is_for(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-    fn CMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if is_if(lista, token, pos)
-            || is_declaration(lista, token, pos)
-            || is_atribuicao(lista, token, pos)
-            || Return(lista, token, pos)
-            || println(lista, token, pos)
-            || scanln(lista, token, pos)
-            || is_while(lista, token, pos)
-            || Continue(lista, token, pos)
-            || Break(lista, token, pos)
-            || is_for(lista, token, pos)
-        {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     fn for_block(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if token.lexeme == "}" {
             return true;
@@ -1268,10 +1205,16 @@ fn is_for(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
 fn CMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     if is_if(lista, token, pos) {
         return true;
-    } else if is_declaration(lista, token, pos) {
-        return true;
-    } else if is_atribuicao(lista, token, pos) {
-        return true;
+    } else if Type(lista, token, pos) {
+        if is_declaration(lista, token, pos) {
+            return true;
+        }
+        return false;
+    } else if token.tipe == "ID" {
+        if is_atribuicao(lista, token, pos) {
+            return true;
+        }
+        return false;
     } else if Return(lista, token, pos) {
         return true;
     } else if println(lista, token, pos) {
@@ -1286,6 +1229,11 @@ fn CMD(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         return true;
     } else if is_for(lista, token, pos) {
         return true;
+    } else if token.lexeme == "call" {
+        if func_call(lista, token, pos) {
+            return true;
+        }
+        return false;
     } else {
         return false;
     }
