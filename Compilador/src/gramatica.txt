@@ -42,7 +42,7 @@ TYPE -> 'INT' | 'FLOAT' | 'CHAR' | 'BOOL'
 VALUE -> integer | float | boolean | char | ID | FUNC_CALL_IMP | OPERATION
 
 Regra Atibuição:
-ATB -> ID OP_ATB ';'
+ATB -> ID OP_ATB 
 OP_ATB -> COMP_OP  | SIMP_OP
 COMP_OP -> ATB_TYPE COMP_OPTION
 COMP_OPTION -> OPERATION | ID | func_call_imp | integer | floating_point | char | boolean

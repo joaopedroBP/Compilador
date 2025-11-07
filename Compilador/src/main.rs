@@ -1,5 +1,7 @@
+mod arvore;
 mod lexer;
 mod parser;
+
 use std::fs::File;
 //use std::io::Write;
 fn main() {
@@ -22,4 +24,22 @@ fn main() {
     } else {
         println!("codigo inválido");
     }
+
+    let mut nodeA: arvore::Node = arvore::Node::new("A");
+    let mut nodeB: arvore::Node = arvore::Node::new("B");
+    let mut nodeC: arvore::Node = arvore::Node::new("C");
+    let mut nodeD: arvore::Node = arvore::Node::new("D");
+    let mut nodeE: arvore::Node = arvore::Node::new("E");
+    let mut nodeF: arvore::Node = arvore::Node::new("F");
+
+    nodeA.add_node_name(nodeB);
+    nodeA.add_node_name(nodeC);
+    nodeA.add_node_name(nodeD);
+    nodeC.add_node_name(nodeE);
+    nodeC.add_node_name(nodeB);
+
+    let mut arvore: arvore::Tree = arvore::Tree::new(nodeA);
+    arvore.pre_ordem_raiz();
+    arvore.print_code_root();
+    arvore.print_tree();
 }
