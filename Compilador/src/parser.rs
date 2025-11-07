@@ -641,7 +641,13 @@ fn FUNC(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
 
     if token.lexeme == "function" {
         next_token(lista, pos, token);
-        if token.tipe == "ID" {
+        if token.lexeme == "main" {
+            if Main(lista, token, pos) {
+                return true;
+            } else {
+                return false;
+            }
+        } else if token.tipe == "ID" {
             next_token(lista, pos, token);
             if token.lexeme == "(" {
                 next_token(lista, pos, token);
@@ -702,9 +708,7 @@ fn is_declaration(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> boo
     }
 
     fn DECLARATION(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
-        if Main(lista, token, pos) {
-            return true;
-        } else if VAR(lista, pos, token) {
+        if VAR(lista, pos, token) {
             return true;
         } else if FUNC(lista, token, pos) {
             return true;
