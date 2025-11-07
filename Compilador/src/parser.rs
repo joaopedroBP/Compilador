@@ -172,14 +172,11 @@ fn VAR_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     }
 
     fn COMP_OPTION(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
-        if is_operation(lista, token, pos) {
-            return true;
-        } else if token.tipe == "Reserved_call" {
+        if token.tipe == "Reserved_call" {
             next_token(lista, pos, token);
             if FUNC_CALL(lista, token, pos) {
                 return true;
             } else {
-                erro("invalid function call in assignment", token);
                 return false;
             }
         } else if token.tipe == "Floating_Point"
@@ -190,9 +187,19 @@ fn VAR_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
             || token.tipe == "ID"
         {
             next_token(lista, pos, token);
+            if token.lexeme == "+"
+                || token.lexeme == "-"
+                || token.lexeme == "*"
+                || token.lexeme == "/"
+            {
+                if is_operation(lista, token, pos) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
             return true;
         } else {
-            erro("invalid value in assignment", token);
             return false;
         }
     }
@@ -206,11 +213,9 @@ fn VAR_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                 if COMP_OPTION(lista, token, pos) {
                     return true;
                 } else {
-                    erro("expected valeu after assignment operator", token);
                     return false;
                 }
             } else {
-                erro("expected '=' after arithmetic operator", token);
                 return false;
             }
         } else if token.lexeme == "=" {
@@ -218,7 +223,6 @@ fn VAR_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
             if COMP_OPTION(lista, token, pos) {
                 return true;
             } else {
-                erro("expected value after '='", token);
                 return false;
             }
         } else {
@@ -231,7 +235,6 @@ fn VAR_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         } else if COMP_OP(lista, token, pos) {
             return true;
         } else {
-            erro("invalid assignment operation", token);
             return false;
         }
     }
@@ -255,7 +258,6 @@ fn FUNC_CALL(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
             next_token(lista, pos, token);
             return true;
         } else {
-            erro("invalid argument type in function call", token);
             return false;
         }
     }
@@ -266,7 +268,6 @@ fn FUNC_CALL(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
             if arguments(lista, token, pos) {
                 return true;
             } else {
-                erro("invalid argument after ','", token);
                 return false;
             }
         }
@@ -277,7 +278,6 @@ fn FUNC_CALL(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
             if args(lista, token, pos) {
                 return true;
             } else {
-                erro("invalid argument lista", token);
                 return false;
             }
         }
@@ -453,7 +453,6 @@ fn Main(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         {
             return true;
         } else {
-            erro("invalid or unexpected command insidde main function", token);
             return false;
         }
     }
@@ -515,7 +514,6 @@ fn VAR(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
             if FUNC_CALL(lista, token, pos) {
                 return true;
             } else {
-                erro("invalid function call in declaration assignment", token);
                 return false;
             }
         } else if token.tipe == "Floating_Point"
@@ -526,9 +524,19 @@ fn VAR(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
             || token.tipe == "ID"
         {
             next_token(lista, pos, token);
+            if token.lexeme == "+"
+                || token.lexeme == "-"
+                || token.lexeme == "*"
+                || token.lexeme == "/"
+            {
+                if is_operation(lista, token, pos) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
             return true;
         } else {
-            erro("Missing or invalid value in declaration assignment", token);
             return false;
         }
     }
@@ -546,6 +554,7 @@ fn VAR(lista: &Vec<Token>, pos: &mut usize, token: &mut Token) -> bool {
                     return false;
                 }
             } else {
+                erro("variable being assigned invalid value", token);
                 return false;
             }
         } else {
@@ -568,7 +577,6 @@ fn FUNC(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
             next_token(lista, pos, token);
             return true;
         } else {
-            erro("invalid parameter type", token);
             return false;
         }
     }
@@ -579,7 +587,6 @@ fn FUNC(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
             if PARAMETER(lista, token, pos) {
                 return true;
             } else {
-                erro("invalid function parameter", token);
                 return false;
             }
         }
@@ -597,11 +604,9 @@ fn FUNC(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                         return false;
                     }
                 } else {
-                    erro("parameter missing identifier after ':'", token);
                     return false;
                 }
             } else {
-                erro("parameter missing ':' after type", token);
                 return false;
             }
         }
@@ -622,7 +627,6 @@ fn FUNC(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         {
             return true;
         } else {
-            erro("invalid or unexpected command inside function body", token);
             return false;
         }
     }
@@ -634,7 +638,6 @@ fn FUNC(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if CMD(lista, token, pos) {
             return func_block(lista, token, pos);
         } else {
-            erro("unexpected token inside function block", token);
             return false;
         }
     }
@@ -702,7 +705,6 @@ fn is_declaration(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> boo
             next_token(lista, pos, token);
             return true;
         } else {
-            erro("invalid or missing declaration type", token);
             return false;
         }
     }
@@ -713,7 +715,6 @@ fn is_declaration(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> boo
         } else if FUNC(lista, token, pos) {
             return true;
         } else {
-            erro("invalid or missing declaration structure", token);
             return false;
         }
     }
@@ -727,7 +728,6 @@ fn is_declaration(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> boo
                 return false;
             }
         } else {
-            erro("Declaration Missing ':' after type", token);
             return false;
         }
     } else {
@@ -750,7 +750,6 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         {
             return true;
         } else {
-            erro("invalid or unexpected command inside if body", token);
             return false;
         }
     }
@@ -778,11 +777,9 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                         return false;
                     }
                 } else {
-                    erro("exprected comparison after '&&'", token);
                     return false;
                 }
             } else {
-                erro("single '&' found - did you mean '&&'", token);
                 return false;
             }
         }
@@ -798,7 +795,6 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                 return false;
             }
         } else {
-            erro("invalidd expressing in condition", token);
             return false;
         }
     }
@@ -815,11 +811,9 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                         return false;
                     }
                 } else {
-                    erro("expected expressin after '||'", token);
                     return false;
                 }
             } else {
-                erro("single '|' found - did you mean '||'?", token);
                 return false;
             }
         }
@@ -835,7 +829,6 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                 return false;
             }
         } else {
-            erro("invalid logical OR expressio", token);
             return false;
         }
     }
@@ -844,7 +837,6 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if EXP_OU(lista, token, pos) {
             return true;
         } else {
-            erro("invalid condition inside parentheses", token);
             return false;
         }
     }
@@ -859,15 +851,12 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                     next_token(lista, pos, token);
                     return true;
                 } else {
-                    erro("missing '}' in else-if block", token);
                     return false;
                 }
             } else {
-                erro("invalid comand inside else-if block", token);
                 return false;
             }
         } else {
-            erro("missing '{' in else-if block", token);
             return false;
         }
     }
@@ -878,7 +867,6 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
             if is_elseif(lista, token, pos) {
                 return true;
             } else {
-                erro("invalid syntax in else block", token);
                 return false;
             }
         }
@@ -975,7 +963,6 @@ fn println(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                     return true;
                 }
             } else {
-                erro("expected variable name after ',' in println", token);
                 return false;
             }
         }
@@ -1034,7 +1021,6 @@ fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         {
             return true;
         } else {
-            erro("invalid or unexpected command inside while body", token);
             return false;
         }
     }
@@ -1062,11 +1048,9 @@ fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                         return false;
                     }
                 } else {
-                    erro("invalid comparison after '&&'", token);
                     return false;
                 }
             } else {
-                erro("missing second '&' in '&&' operator", token);
                 return false;
             }
         } else {
@@ -1082,7 +1066,6 @@ fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                 return false;
             }
         } else {
-            erro("invalid comparation sexpression in while condition", token);
             return false;
         }
     }
@@ -1099,11 +1082,9 @@ fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                         return false;
                     }
                 } else {
-                    erro("invalid expression after '||'", token);
                     return false;
                 }
             } else {
-                erro("missing second '|' in '||' operator", token);
                 return false;
             }
         } else {
@@ -1119,7 +1100,6 @@ fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                 return false;
             }
         } else {
-            erro("invalid logical OR expression in while condition", token);
             return false;
         }
     }
@@ -1192,7 +1172,6 @@ fn is_for(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         {
             return true;
         } else {
-            erro("invalid or unexpected command inside if body", token);
             return false;
         }
     }
@@ -1204,7 +1183,6 @@ fn is_for(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
         if CMD(lista, token, pos) {
             return for_block(lista, token, pos);
         } else {
-            erro("invalid statement inside 'for' block", token);
             return false;
         }
     }
@@ -1218,14 +1196,9 @@ fn is_for(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
                 next_token(lista, pos, token);
                 return true;
             } else {
-                erro("for loop missing ';' after ID comparator", token);
                 return false;
             }
         } else {
-            erro(
-                "for loop invalid comparator (expected declaration or ID)",
-                token,
-            );
             return false;
         }
     }
