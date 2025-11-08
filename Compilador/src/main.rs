@@ -37,7 +37,7 @@ fn main() {
 
     Node::add_node(&node_a, &node_b);
     Node::add_node(&node_a, &node_c);
-    Node::add_node(&node_a, &node_d);
-    Node::add_node(&node_c, &node_e);
-    Node::add_node(&node_c, &node_f);
+    Node::add_node(&node_a, &node_b);
+    Node::add_node(&node_a, &node_b);
+    Node::add_node(&node_a, &node_b);
 }

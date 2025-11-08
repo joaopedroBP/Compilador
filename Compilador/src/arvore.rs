@@ -3,7 +3,6 @@ use std::rc::Rc;
 
 pub type NodeRef = Rc<RefCell<Node>>;
 
-#[derive(Clone)]
 pub struct Node {
     pub nome: String,
     pub nodes: Vec<NodeRef>,
@@ -21,11 +20,11 @@ impl Node {
         }))
     }
 
-    pub fn add_node_name(self_ref: &NodeRef, new_node: &NodeRef) {
+    pub fn add_node(self_ref: &NodeRef, new_node: &NodeRef) {
         self_ref.borrow_mut().nodes.push(Rc::clone(new_node));
     }
 
-    pub fn add_node(self_ref: &NodeRef, nome: &str) -> NodeRef {
+    pub fn add_node_name(self_ref: &NodeRef, nome: &str) -> NodeRef {
         let new_node = Node::new(nome);
         self_ref.borrow_mut().nodes.push(Rc::clone(&new_node));
         return new_node;
