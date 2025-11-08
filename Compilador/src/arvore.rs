@@ -1,39 +1,45 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
+pub type NodeRef = Rc<RefCell<Node>>;
+
 #[derive(Clone)]
 pub struct Node {
     pub nome: String,
-    pub nodes: Vec<Node>,
+    pub nodes: Vec<NodeRef>,
     pub enter: String,
     pub exit: String,
 }
 
 impl Node {
-    pub fn new(nome: &str) -> Node {
-        Node {
+    pub fn new(nome: &str) -> NodeRef {
+        Rc::new(RefCell::new(Node {
             nome: nome.to_string(),
             nodes: Vec::new(),
             enter: "".to_string(),
             exit: "".to_string(),
+        }))
+    }
+
+    pub fn add_node_name(self_ref: &NodeRef, new_node: &NodeRef) {
+        self_ref.borrow_mut().nodes.push(Rc::clone(new_node));
+    }
+
+    pub fn add_node(self_ref: &NodeRef, nome: &str) -> NodeRef {
+        let new_node = Node::new(nome);
+        self_ref.borrow_mut().nodes.push(Rc::clone(&new_node));
+        return new_node;
+    }
+
+    pub fn add_node_full(self_ref: &NodeRef, enter: &str, nome: &str, exit: &str) -> NodeRef {
+        let new_node = Node::new(nome);
+        {
+            let mut n = new_node.borrow_mut();
+            n.enter = enter.to_string();
+            n.exit = exit.to_string();
         }
-    }
-
-    pub fn add_node_name(&mut self, new_node: Node) {
-        self.nodes.push(new_node);
-    }
-
-    pub fn add_node(&mut self, nome: &str) -> &mut Node {
-        let mut newNode: Node = Node::new(nome);
-        self.nodes.push(newNode);
-        let index = self.nodes.len() - 1;
-        return &mut self.nodes[index];
-    }
-
-    pub fn add_node_full(&mut self, enter: &str, nome: &str, exit: &str) -> &mut Node {
-        let mut newNode: Node = Node::new(nome);
-        newNode.enter = enter.to_string();
-        newNode.exit = exit.to_string();
-        self.nodes.push(newNode);
-        let index = self.nodes.len() - 1;
-        return &mut self.nodes[index];
+        self_ref.borrow_mut().nodes.push(Rc::clone(&new_node));
+        return new_node;
     }
 
     pub fn to_string(&self) -> String {
@@ -41,20 +47,21 @@ impl Node {
         return tostr;
     }
 
-    pub fn get_tree(&self) -> String {
+    pub fn get_tree(self_ref: &NodeRef) -> String {
         println!("AST");
         let mut buffer = String::with_capacity(50);
-        self.print(&mut buffer, "", "");
-        buffer
+        Self::print(self_ref, &mut buffer, "", "");
+        return buffer;
     }
 
-    fn print(&self, buffer: &mut String, prefix: &str, children_prefix: &str) {
+    fn print(self_ref: &NodeRef, buffer: &mut String, prefix: &str, children_prefix: &str) {
+        let node = self_ref.borrow();
         buffer.push_str(prefix);
-        buffer.push_str(&self.nome);
+        buffer.push_str(&node.nome);
         buffer.push('\n');
 
-        let total = self.nodes.len();
-        for (i, child) in self.nodes.iter().enumerate() {
+        let total = node.nodes.len();
+        for (i, child) in node.nodes.iter().enumerate() {
             let (new_prefix, new_children_prefix) = if i < total - 1 {
                 (
                     format!("{}+-- ", children_prefix),
@@ -67,17 +74,17 @@ impl Node {
                 )
             };
 
-            child.print(buffer, &new_prefix, &new_children_prefix);
+            Self::print(child, buffer, &new_prefix, &new_children_prefix);
         }
     }
 }
 
 pub struct Tree {
-    pub root: Node,
+    pub root: NodeRef,
 }
 
 impl Tree {
-    pub fn new(root: Node) -> Tree {
+    pub fn new(root: NodeRef) -> Tree {
         Tree { root: root }
     }
 
@@ -86,7 +93,8 @@ impl Tree {
         println!();
     }
 
-    pub fn pre_ordem(node: &Node) {
+    pub fn pre_ordem(node_ref: &NodeRef) {
+        let node = node_ref.borrow();
         print!("{}", node.to_string());
         for n in &node.nodes {
             Self::pre_ordem(n);
@@ -97,7 +105,8 @@ impl Tree {
         Self::print_code(&self.root);
     }
 
-    pub fn print_code(node: &Node) {
+    pub fn print_code(node_ref: &NodeRef) {
+        let node = node_ref.borrow();
         print!("{}", node.enter);
         if node.nodes.is_empty() {
             print!("{}", node.to_string());
@@ -109,6 +118,6 @@ impl Tree {
     }
 
     pub fn print_tree(&self) {
-        println!("{}", self.root.get_tree());
+        println!("{}", Node::get_tree(&self.root));
     }
 }

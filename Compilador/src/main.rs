@@ -1,8 +1,11 @@
 mod arvore;
 mod lexer;
 mod parser;
-
+use arvore::Node;
+use std::cell::RefCell;
 use std::fs::File;
+use std::rc::Rc;
+
 //use std::io::Write;
 fn main() {
     //    {
@@ -25,21 +28,16 @@ fn main() {
         println!("codigo inválido");
     }
 
-    let mut nodeA: arvore::Node = arvore::Node::new("A");
-    let mut nodeB: arvore::Node = arvore::Node::new("B");
-    let mut nodeC: arvore::Node = arvore::Node::new("C");
-    let mut nodeD: arvore::Node = arvore::Node::new("D");
-    let mut nodeE: arvore::Node = arvore::Node::new("E");
-    let mut nodeF: arvore::Node = arvore::Node::new("F");
+    let node_a = Rc::new(RefCell::new(Node::new("A")));
+    let node_b = Rc::new(RefCell::new(Node::new("B")));
+    let node_c = Rc::new(RefCell::new(Node::new("C")));
+    let node_d = Rc::new(RefCell::new(Node::new("D")));
+    let node_e = Rc::new(RefCell::new(Node::new("E")));
+    let node_f = Rc::new(RefCell::new(Node::new("F")));
 
-    nodeA.add_node_name(nodeB.clone());
-    nodeA.add_node_name(nodeC.clone());
-    nodeA.add_node_name(nodeD.clone());
-    nodeC.add_node_name(nodeE.clone());
-    nodeC.add_node_name(nodeB.clone());
-
-    let mut arvore: arvore::Tree = arvore::Tree::new(nodeA);
-    arvore.pre_ordem_raiz();
-    arvore.print_code_root();
-    arvore.print_tree();
+    Node::add_node(&node_a, &node_b);
+    Node::add_node(&node_a, &node_c);
+    Node::add_node(&node_a, &node_d);
+    Node::add_node(&node_c, &node_e);
+    Node::add_node(&node_c, &node_f);
 }
