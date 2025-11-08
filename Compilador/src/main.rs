@@ -32,11 +32,11 @@ fn main() {
     let mut nodeE: arvore::Node = arvore::Node::new("E");
     let mut nodeF: arvore::Node = arvore::Node::new("F");
 
-    nodeA.add_node_name(nodeB);
-    nodeA.add_node_name(nodeC);
-    nodeA.add_node_name(nodeD);
-    nodeC.add_node_name(nodeE);
-    nodeC.add_node_name(nodeB);
+    nodeA.add_node_name(nodeB.clone());
+    nodeA.add_node_name(nodeC.clone());
+    nodeA.add_node_name(nodeD.clone());
+    nodeC.add_node_name(nodeE.clone());
+    nodeC.add_node_name(nodeB.clone());
 
     let mut arvore: arvore::Tree = arvore::Tree::new(nodeA);
     arvore.pre_ordem_raiz();

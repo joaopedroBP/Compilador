@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct Node {
     pub nome: String,
     pub nodes: Vec<Node>,
