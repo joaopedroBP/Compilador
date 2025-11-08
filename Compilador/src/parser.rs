@@ -1,3 +1,5 @@
+use crate::arvore::Node;
+use crate::arvore::Tree;
 use crate::lexer::Token;
 
 fn erro(regra: &str, token_atual: &mut Token) {
@@ -1251,15 +1253,18 @@ fn bloco(lista: &Vec<Token>, token: &mut Token, pos: &mut usize) -> bool {
     return false;
 }
 
-pub fn parser(lista: Vec<Token>) -> bool {
+pub fn parser(lista: Vec<Token>) -> (bool, Tree) {
     let mut pos: usize = 0;
     let mut token: Token = Token::new("", "");
+    let root = Node::new("Code");
+    let mut arvore: Tree = Tree::new(root);
+
     next_token(&lista, &mut pos, &mut token);
     let result: bool = bloco(&lista, &mut token, &mut pos);
 
     if result {
-        return true;
+        (true, arvore);
     } else {
-        return false;
+        (false, arvore);
     }
 }
