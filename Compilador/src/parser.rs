@@ -698,6 +698,12 @@ fn VAR(lista: &Vec<Token>, pos: &mut usize, token: &mut Token, pai: &NodeRef) ->
             } else {
                 return false;
             }
+        } else if token.lexeme == "scanln" {
+            if scanln(lista, token, pos, pai) {
+                return true;
+            } else {
+                return false;
+            }
         } else if token.tipe == "Floating_Point"
             || token.tipe == "Integer"
             || token.tipe == "character"
@@ -937,11 +943,6 @@ fn is_declaration(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &
     fn DECLARATION(lista: &Vec<Token>, pos: &mut usize, token: &mut Token, pai: &NodeRef) -> bool {
         if token.lexeme == "function" {
             if FUNC(lista, token, pos, pai) {
-                return true;
-            }
-            return false;
-        } else if token.lexeme == "scanln" {
-            if scanln(lista, token, pos, pai) {
                 return true;
             }
             return false;

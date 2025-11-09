@@ -61,6 +61,10 @@ fn is_valid_integer(code: &str) -> Token {
         return Token::new("EOF", "$");
     }
 
+    if current_character == '-' {
+        current_character = code_characters.next().unwrap_or('$');
+    }
+
     while current_character != '$' {
         if !current_character.is_ascii_digit() {
             return Token::new("Err", "???");
@@ -184,14 +188,18 @@ fn is_floatin_point(code: &str) -> Token {
         return Token::new("Err", "???");
     }
 
-    let before_dot = parts[0];
+    let mut before_dot = parts[0];
     let after_dot = parts[1];
+
+    if before_dot.starts_with('-') {
+        before_dot = &before_dot[1..];
+    }
 
     if before_dot.is_empty() || after_dot.is_empty() {
         return Token::new("Err", "???");
     }
 
-    for part in parts {
+    for part in [before_dot,after_dot] {
         if !part.chars().all(|character| character.is_ascii_digit()) {
             return Token::new("Err", "???");
         }
@@ -326,6 +334,30 @@ pub fn get_tokens(mut code: File) -> Vec<Token> {
                     if !accumulator.is_empty() {
                         tokens.push(Token::add_pos(is_valid_token(&accumulator), linha, coluna));
                         accumulator.clear();
+                    }
+                    if character == '-' {
+                        let next_char = code_characters.clone().next();
+
+                        let mut last_tipe = "";
+                        let mut last_lexeme = "";
+
+                        if let Some(t) = tokens.last() {
+                            last_tipe = &t.tipe;
+                            last_lexeme = &t.lexeme;
+                        }
+
+                        if !(last_tipe == "Integer"
+                            || last_tipe == "Floating_Point"
+                            || last_tipe == "ID"
+                            || last_lexeme == ")")
+                        {
+                            if let Some(proximo) = next_char {
+                                if proximo.is_ascii_digit() {
+                                    accumulator.push('-');
+                                    continue;
+                                }
+                            }
+                        }
                     }
                     tokens.push(Token::add_pos(
                         is_math_operator(&character.to_string()),
