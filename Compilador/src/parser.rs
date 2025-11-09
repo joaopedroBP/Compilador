@@ -60,7 +60,7 @@ fn Continue(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRe
 }
 
 fn Break(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef) -> bool {
-    let break_call_node = Node::new("break");
+    let break_call_node = Node::new("break_call");
     let break_node = Node::new("break");
     if token.lexeme == "break" {
         Node::add_node(pai, &break_call_node);
@@ -80,28 +80,72 @@ fn Break(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef) 
     }
 }
 
-fn is_valid_comparated(token: &mut Token) -> bool {
-    match token.tipe.as_str() {
-        "Floating_Point" => true,
-        "Integer" => true,
-        "Reserved_TRUE" => true,
-        "Reserved_FALSE" => true,
-        "ID" => true,
-        _ => false,
+fn is_valid_comparated(
+    lista: &Vec<Token>,
+    token: &mut Token,
+    pos: &mut usize,
+    pai: &NodeRef,
+) -> bool {
+    if token.tipe == "Reserved_call" {
+        if func_call_interna(lista, token, pos, pai) {
+            return true;
+        } else {
+            return false;
+        }
+    } else if token.tipe == "Floating_Point"
+        || token.tipe == "Integer"
+        || token.tipe == "character"
+        || token.tipe == "Reserved_TRUE"
+        || token.tipe == "Reserved_FALSE"
+        || token.tipe == "ID"
+    {
+        let aux_pos: usize = *pos;
+
+        if lista[aux_pos].lexeme == "+"
+            || lista[aux_pos].lexeme == "-"
+            || lista[aux_pos].lexeme == "*"
+            || lista[aux_pos].lexeme == "/"
+        {
+            if is_operation(lista, token, pos, pai) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        let direcct_com_node = Node::new("direct_comparation");
+        let node_type = Node::new(&token.tipe);
+        let node_name = Node::new(&token.lexeme);
+        Node::add_node(pai, &direcct_com_node);
+        Node::add_node(&direcct_com_node, &node_type);
+        Node::add_node(&node_type, &node_name);
+        next_token(lista, pos, token);
+        return true;
+    } else {
+        return false;
     }
 }
 
 fn OP_COMP(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef) -> bool {
+    let et_node = Node::new("=");
+    let comp_op_node = Node::new("comparation_operator");
+    Node::add_node(pai, &comp_op_node);
     if token.lexeme == ">" || token.lexeme == "<" {
+        let fc_node = Node::new(&token.lexeme);
+        Node::add_node(&comp_op_node, &fc_node);
         next_token(lista, pos, token);
         if token.lexeme == "=" {
+            next_token(lista, pos, token);
+            Node::add_node(&comp_op_node, &et_node);
             return true;
         } else {
             return true;
         }
     } else if token.lexeme == "!" || token.lexeme == "=" {
+        let fc_node = Node::new(&token.lexeme);
+        Node::add_node(&comp_op_node, &fc_node);
         next_token(lista, pos, token);
         if token.lexeme == "=" {
+            Node::add_node(&comp_op_node, &et_node);
             next_token(lista, pos, token);
             return true;
         } else {
@@ -118,11 +162,11 @@ fn OP_COMP(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef
 }
 
 fn COMPARATION(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef) -> bool {
-    if is_valid_comparated(token) {
-        next_token(lista, pos, token);
-        if OP_COMP(&lista, token, pos, pai) {
-            if is_valid_comparated(token) {
-                next_token(lista, pos, token);
+    let comparation_node = Node::new("comparation");
+    Node::add_node(pai, &comparation_node);
+    if is_valid_comparated(lista, token, pos, &comparation_node) {
+        if OP_COMP(&lista, token, pos, &comparation_node) {
+            if is_valid_comparated(lista, token, pos, &comparation_node) {
                 return true;
             } else {
                 erro("expected value after comparison operator", token);
@@ -186,12 +230,16 @@ fn Return(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef)
 
 fn VAR_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef) -> bool {
     fn SIMP_OP(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef) -> bool {
+        let simp_op_node = Node::new("simple_atribution");
         if token.lexeme == "+" {
             let mut aux_pos: usize = *pos;
             if lista[aux_pos].lexeme == "+" {
                 let plus_node = Node::new("+");
-                Node::add_node(pai, &plus_node);
-                Node::add_node(pai, &plus_node);
+                let increment_node = Node::new("increment");
+                Node::add_node(pai, &simp_op_node);
+                Node::add_node(&simp_op_node, &increment_node);
+                Node::add_node(&increment_node, &plus_node);
+                Node::add_node(&increment_node, &plus_node);
                 next_token(lista, pos, token);
                 next_token(lista, pos, token);
                 return true;
@@ -202,8 +250,11 @@ fn VAR_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef
             let mut aux_pos: usize = *pos;
             if lista[aux_pos].lexeme == "-" {
                 let minus_node = Node::new("-");
-                Node::add_node(pai, &minus_node);
-                Node::add_node(pai, &minus_node);
+                let reduction_node = Node::new("reduction");
+                Node::add_node(pai, &simp_op_node);
+                Node::add_node(&simp_op_node, &reduction_node);
+                Node::add_node(&reduction_node, &minus_node);
+                Node::add_node(&reduction_node, &minus_node);
                 next_token(lista, pos, token);
                 next_token(lista, pos, token);
                 return true;
@@ -242,9 +293,11 @@ fn VAR_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef
                     return false;
                 }
             }
+            let direcct_atb_node = Node::new("direct_attribution");
             let node_type = Node::new(&token.tipe);
             let node_name = Node::new(&token.lexeme);
-            Node::add_node(pai, &node_type);
+            Node::add_node(pai, &direcct_atb_node);
+            Node::add_node(&direcct_atb_node, &node_type);
             Node::add_node(&node_type, &node_name);
             next_token(lista, pos, token);
             return true;
@@ -320,6 +373,10 @@ fn func_call_interna(
             || token.tipe == "Reserved_TRUE"
             || token.tipe == "Reserved_FALSE"
         {
+            let type_node = Node::new(&token.tipe);
+            let type_name_node = Node::new(&token.lexeme);
+            Node::add_node(pai, &type_node);
+            Node::add_node(&type_node, &type_name_node);
             next_token(lista, pos, token);
             return true;
         } else {
@@ -330,33 +387,57 @@ fn func_call_interna(
     fn args(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef) -> bool {
         if token.lexeme == "," {
             next_token(lista, pos, token);
-            if arguments(lista, token, pos, pai) {
-                return true;
+            if token.lexeme != ")" {
+                if arguments(lista, token, pos, pai) {
+                    return true;
+                } else {
+                    return false;
+                }
             } else {
+                erro("functon missing an argument after ','", token);
                 return false;
             }
         }
         return true;
     }
     fn arguments(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef) -> bool {
-        if argument_type(lista, token, pos, pai) {
-            if args(lista, token, pos, pai) {
-                return true;
+        if token.lexeme != ")" {
+            if argument_type(lista, token, pos, pai) {
+                if args(lista, token, pos, pai) {
+                    return true;
+                } else {
+                    return false;
+                }
             } else {
+                erro("function argument missing or invalid", token);
                 return false;
             }
         }
         return true;
     }
 
+    let i_func_c_node = Node::new("internal_function_call");
+    Node::add_node(pai, &i_func_c_node);
     if token.lexeme == "call" {
+        let call_node = Node::new("call");
+        Node::add_node(&i_func_c_node, &call_node);
         next_token(lista, pos, token);
         if token.tipe == "ID" {
+            let id_node = Node::new("ID");
+            let id_name_node = Node::new(&token.lexeme);
+            Node::add_node(&i_func_c_node, &id_node);
+            Node::add_node(&id_node, &id_name_node);
             next_token(lista, pos, token);
             if token.lexeme == "(" {
+                let op_node = Node::new("(");
+                let func_arguments_node = Node::new("function_call_arguments");
+                Node::add_node(&i_func_c_node, &op_node);
+                Node::add_node(&i_func_c_node, &func_arguments_node);
                 next_token(lista, pos, token);
-                if arguments(lista, token, pos, pai) {
+                if arguments(lista, token, pos, &func_arguments_node) {
                     if token.lexeme == ")" {
+                        let cp_node = Node::new(")");
+                        Node::add_node(&i_func_c_node, &cp_node);
                         next_token(lista, pos, token);
                         return true;
                     } else {
@@ -381,8 +462,12 @@ fn func_call_interna(
 }
 
 fn func_call(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef) -> bool {
-    if func_call_interna(lista, token, pos, pai) {
+    let func_c_node = Node::new("function_call");
+    Node::add_node(pai, &func_c_node);
+    if func_call_interna(lista, token, pos, &func_c_node) {
         if token.lexeme == ";" {
+            let end_node = Node::new(";");
+            Node::add_node(&func_c_node, &end_node);
             next_token(lista, pos, token);
             return true;
         } else {
@@ -855,6 +940,11 @@ fn is_declaration(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &
                 return true;
             }
             return false;
+        } else if token.lexeme == "scanln" {
+            if scanln(lista, token, pos, pai) {
+                return true;
+            }
+            return false;
         } else if VAR(lista, pos, token, pai) {
             return true;
         } else {
@@ -888,6 +978,7 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef) 
         if token.lexeme == "}" {
             return true;
         }
+
         if CMD(lista, token, pos, pai) {
             return if_block(lista, token, pos, pai);
         } else {
@@ -899,6 +990,8 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef) 
         if (token.lexeme == "&") {
             next_token(lista, pos, token);
             if (token.lexeme == "&") {
+                let and_node = Node::new("&&");
+                Node::add_node(pai, &and_node);
                 next_token(lista, pos, token);
                 if COMPARATION(lista, token, pos, pai) {
                     if EXP_EL(lista, token, pos, pai) {
@@ -933,6 +1026,8 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef) 
         if token.lexeme == "|" {
             next_token(lista, pos, token);
             if token.lexeme == "|" {
+                let or_node = Node::new("||");
+                Node::add_node(pai, &or_node);
                 next_token(lista, pos, token);
                 if EXP_E(lista, token, pos, pai) {
                     if EXP_OUL(lista, token, pos, pai) {
@@ -975,9 +1070,15 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef) 
         if is_if(lista, token, pos, pai) {
             return true;
         } else if (token.lexeme == "{") {
+            let ocb_node = Node::new("{");
+            Node::add_node(pai, &ocb_node);
             next_token(lista, pos, token);
-            if if_block(&lista, token, pos, pai) {
+            let if_body_node = Node::new("if_block");
+            Node::add_node(pai, &if_body_node);
+            if if_block(&lista, token, pos, &if_body_node) {
                 if (token.lexeme == "}") {
+                    let ccb_node = Node::new("}");
+                    Node::add_node(pai, &ccb_node);
                     next_token(lista, pos, token);
                     return true;
                 } else {
@@ -993,8 +1094,10 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef) 
 
     fn is_else(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef) -> bool {
         if token.lexeme == "else" {
+            let else_node = Node::new("else");
+            Node::add_node(pai, &else_node);
             next_token(lista, pos, token);
-            if is_elseif(lista, token, pos, pai) {
+            if is_elseif(lista, token, pos, &else_node) {
                 return true;
             } else {
                 return false;
@@ -1003,19 +1106,35 @@ fn is_if(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef) 
         return true;
     }
 
+    let if_condition = Node::new("if_condition");
     if token.lexeme == "if" {
+        let if_node = Node::new("if");
+        Node::add_node(pai, &if_condition);
+        Node::add_node(&if_condition, &if_node);
         next_token(lista, pos, token);
         if token.lexeme == "(" {
+            let op_node = Node::new("(");
+            let cond_node = Node::new("condition");
+            Node::add_node(&if_condition, &op_node);
+            Node::add_node(&if_condition, &cond_node);
             next_token(lista, pos, token);
-            if COND(&lista, token, pos, pai) {
+            if COND(&lista, token, pos, &cond_node) {
                 if token.lexeme == ")" {
+                    let cp_node = Node::new(")");
+                    Node::add_node(&if_condition, &cp_node);
                     next_token(lista, pos, token);
                     if token.lexeme == "{" {
+                        let ocb_node = Node::new("{");
+                        Node::add_node(&if_condition, &ocb_node);
                         next_token(lista, pos, token);
-                        if if_block(lista, token, pos, pai) {
+                        let if_body_node = Node::new("if_block");
+                        Node::add_node(&if_condition, &if_body_node);
+                        if if_block(lista, token, pos, &if_body_node) {
                             if token.lexeme == "}" {
+                                let ccb_node = Node::new("}");
+                                Node::add_node(&if_condition, &ccb_node);
                                 next_token(lista, pos, token);
-                                if is_else(&lista, token, pos, pai) {
+                                if is_else(&lista, token, pos, &if_condition) {
                                     return true;
                                 } else {
                                     erro("invalid else or elseif structure", token);
@@ -1061,31 +1180,13 @@ fn scanln(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef)
             let op_node = Node::new("(");
             Node::add_node(&scanln_call_node, &op_node);
             next_token(lista, pos, token);
-            if token.tipe == "ID" {
-                let id_node = Node::new("ID");
-                let id_name_node = Node::new(&token.lexeme);
-                Node::add_node(&scanln_call_node, &id_node);
-                Node::add_node(&id_node, &id_name_node);
+            if token.lexeme == ")" {
+                let cp_node = Node::new(")");
+                Node::add_node(&scanln_call_node, &cp_node);
                 next_token(lista, pos, token);
-                if token.lexeme == ")" {
-                    let cp_node = Node::new(")");
-                    Node::add_node(&scanln_call_node, &cp_node);
-                    next_token(lista, pos, token);
-                    if token.lexeme == ";" {
-                        let end_node = Node::new(";");
-                        Node::add_node(&scanln_call_node, &end_node);
-                        next_token(lista, pos, token);
-                        return true;
-                    } else {
-                        erro("expecterd ';' after scnaln statement", token);
-                        return false;
-                    }
-                } else {
-                    erro("missing closing ')' in scanln", token);
-                    return false;
-                }
+                return true;
             } else {
-                erro("expected identifier inside scanln()", token);
+                erro("missing closing ')' in scanln", token);
                 return false;
             }
         } else {
@@ -1189,6 +1290,8 @@ fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRe
         if token.lexeme == "&" {
             next_token(lista, pos, token);
             if token.lexeme == "&" {
+                let and_node = Node::new("&&");
+                Node::add_node(pai, &and_node);
                 next_token(lista, pos, token);
                 if COMPARATION(lista, token, pos, pai) {
                     if E_PARL(lista, token, pos, pai) {
@@ -1223,6 +1326,8 @@ fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRe
         if token.lexeme == "|" {
             next_token(lista, pos, token);
             if token.lexeme == "|" {
+                let or_node = Node::new("||");
+                Node::add_node(pai, &or_node);
                 next_token(lista, pos, token);
                 if E_PAR(lista, token, pos, pai) {
                     if OU_PARL(lista, token, pos, pai) {
@@ -1255,6 +1360,8 @@ fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRe
 
     fn WPARAMETERS(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef) -> bool {
         if token.tipe == "Reserved_TRUE" {
+            let true_node = Node::new("TRUE");
+            Node::add_node(pai, &true_node);
             next_token(lista, pos, token);
             return true;
         } else if OU_PAR(lista, token, pos, pai) {
@@ -1263,18 +1370,33 @@ fn is_while(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRe
             return false;
         }
     }
-
+    let while_call_node = Node::new("while_loop");
     if token.tipe == "Reserved_while" {
+        let while_node = Node::new("while");
+        Node::add_node(pai, &while_call_node);
+        Node::add_node(&while_call_node, &while_node);
         next_token(lista, pos, token);
         if token.lexeme == "(" {
+            let op_node = Node::new("(");
+            Node::add_node(&while_node, &op_node);
             next_token(lista, pos, token);
-            if WPARAMETERS(lista, token, pos, pai) {
+            let while_par_node = Node::new("while_parameters");
+            Node::add_node(&while_node, &while_par_node);
+            if WPARAMETERS(lista, token, pos, &while_par_node) {
                 if token.lexeme == ")" {
+                    let cp_node = Node::new(")");
+                    Node::add_node(&while_node, &cp_node);
                     next_token(lista, pos, token);
                     if token.lexeme == "{" {
+                        let ocb_node = Node::new("{");
+                        Node::add_node(&while_node, &ocb_node);
                         next_token(lista, pos, token);
-                        if while_block(lista, token, pos, pai) {
+                        let while_block_node = Node::new("while_block");
+                        Node::add_node(&while_node, &while_block_node);
+                        if while_block(lista, token, pos, &while_block_node) {
                             if token.lexeme == "}" {
+                                let ccb_node = Node::new("}");
+                                Node::add_node(&while_node, &ccb_node);
                                 next_token(lista, pos, token);
                                 return true;
                             } else {
@@ -1319,11 +1441,33 @@ fn is_for(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef)
     }
 
     fn COMPARATOR(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef) -> bool {
-        if is_declaration(lista, token, pos, pai) {
-            return true;
+        let it_node = Node::new("iterator");
+        Node::add_node(pai, &it_node);
+        if Type(lista, token, pos, &it_node) {
+            let type_node = Node::new(&token.lexeme);
+            Node::add_node(&it_node, &type_node);
+            next_token(lista, pos, token);
+            if token.lexeme == ":" {
+                let dp_node = Node::new(":");
+                Node::add_node(&it_node, &dp_node);
+                next_token(lista, pos, token);
+                if VAR(lista, pos, token, &it_node) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
         } else if token.tipe == "ID" {
+            let id_node = Node::new("ID");
+            let id_name_node = Node::new(&token.lexeme);
+            Node::add_node(&it_node, &id_node);
+            Node::add_node(&id_node, &id_name_node);
             next_token(lista, pos, token);
             if token.lexeme == ";" {
+                let end_node = Node::new(";");
+                Node::add_node(&it_node, &end_node);
                 next_token(lista, pos, token);
                 return true;
             } else {
@@ -1333,22 +1477,36 @@ fn is_for(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef)
             return false;
         }
     }
-
+    let for_loop_node = Node::new("for_loop");
     if token.tipe == "Reserved_for" {
+        let for_node = Node::new("for");
+        Node::add_node(pai, &for_loop_node);
+        Node::add_node(&for_loop_node, &for_node);
         next_token(lista, pos, token);
         if token.lexeme == "(" {
+            let op_node = Node::new("(");
             next_token(lista, pos, token);
-            if COMPARATOR(lista, token, pos, pai) {
-                if COMPARATION(lista, token, pos, pai) {
+            if COMPARATOR(lista, token, pos, &for_node) {
+                if COMPARATION(lista, token, pos, &for_node) {
                     if token.lexeme == ";" {
+                        let end_node = Node::new(";");
+                        Node::add_node(&for_node, &end_node);
                         next_token(lista, pos, token);
-                        if is_atribuicao_interna(lista, token, pos, pai) {
+                        if is_atribuicao_interna(lista, token, pos, &for_node) {
                             if token.lexeme == ")" {
+                                let cp_node = Node::new(")");
+                                Node::add_node(&for_node, &cp_node);
                                 next_token(lista, pos, token);
                                 if token.lexeme == "{" {
+                                    let ocb_node = Node::new("{");
+                                    Node::add_node(&for_node, &ocb_node);
                                     next_token(lista, pos, token);
-                                    if for_block(lista, token, pos, pai) {
+                                    let for_block_node = Node::new("for_block");
+                                    Node::add_node(&for_node, &for_block_node);
+                                    if for_block(lista, token, pos, &for_block_node) {
                                         if token.lexeme == "}" {
+                                            let ccb_node = Node::new("}");
+                                            Node::add_node(&for_node, &ccb_node);
                                             next_token(lista, pos, token);
                                             return true;
                                         } else {
