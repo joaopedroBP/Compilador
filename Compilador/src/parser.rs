@@ -187,7 +187,7 @@ fn Return(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef)
 fn VAR_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef) -> bool {
     fn SIMP_OP(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef) -> bool {
         if token.lexeme == "+" {
-            let mut aux_pos: usize = *pos + 1;
+            let mut aux_pos: usize = *pos;
             if lista[aux_pos].lexeme == "+" {
                 let plus_node = Node::new("+");
                 Node::add_node(pai, &plus_node);
@@ -199,7 +199,7 @@ fn VAR_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef
                 return false;
             }
         } else if token.lexeme == "-" {
-            let mut aux_pos: usize = *pos + 1;
+            let mut aux_pos: usize = *pos;
             if lista[aux_pos].lexeme == "-" {
                 let minus_node = Node::new("-");
                 Node::add_node(pai, &minus_node);
@@ -208,7 +208,7 @@ fn VAR_ATB(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef
                 next_token(lista, pos, token);
                 return true;
             } else {
-                return true;
+                return false;
             }
         } else {
             return false;
