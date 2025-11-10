@@ -1,5 +1,5 @@
 # Compilador linguagem Berga
-Compilador criado para fins acadêmicos 
+Compilador criado para fins acadêmicos <br>
 João Pedro Bazoli Palma RA:24.123.041-5 <br>
 
 ## Dependências
