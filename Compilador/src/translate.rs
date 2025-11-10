@@ -10,6 +10,7 @@ fn map_type_to_rust(tipo: &str) -> &'static str {
         "FLOAT" => "f32",
         "CHAR" => "char",
         "VOID" => "()",
+        "BOOL" => "bool",
         _ => "i32",
     }
 }
@@ -160,14 +161,12 @@ fn gerar_codigo(node_ref: &NodeRef) -> String {
         | "variable_declaration"
         | "direct_attribution"
         | "simple_atribution"
-        | "function_call_arguments" => {
-            node.nodes.iter().map(gerar_codigo).collect::<String>()
-        }
+        | "function_call_arguments" => node.nodes.iter().map(gerar_codigo).collect::<String>(),
 
         "ID" | "Integer" | "String" | "character" | "FLOAT" => get_id_or_literal_value(node_ref),
 
         "TRUE" => "true".to_string(),
-
+        "FALSE" => "false".to_string(),
         "comparation_operator" => {
             let mut operador = node
                 .nodes
@@ -180,6 +179,8 @@ fn gerar_codigo(node_ref: &NodeRef) -> String {
             }
             operador
         }
+
+        "reduction" => "-= 1".to_string(),
         "increment" => "+= 1".to_string(),
         "println" | "scanln" | "function" | "while" | "for" | "if" | "else" | "return" | "call" => {
             "".to_string()
@@ -348,20 +349,18 @@ fn gerar_while(node_ref: &NodeRef) -> String {
 
     let mut codigo = String::from("while ");
 
-    
     if let Some(no_parametros) = content_children
         .iter()
         .find(|c| c.borrow().nome == "while_parameters")
     {
         codigo.push_str(&extrair_condicao(no_parametros));
     } else if content_children.iter().any(|c| c.borrow().nome == "TRUE") {
-    
         codigo.push_str("true");
     } else {
         codigo.push_str("/* Condição Desconhecida */");
     }
 
-    codigo.push_str(" {\n"); 
+    codigo.push_str(" {\n");
 
     if let Some(bloco_while) = content_children
         .iter()
