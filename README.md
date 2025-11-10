@@ -1,4 +1,5 @@
-# Compilador
+# Compilador linguagem Berga
+Compilador criado para fins acadêmicos 
 João Pedro Bazoli Palma RA:24.123.041-5 <br>
 
 ## Dependências
@@ -7,23 +8,19 @@ Cargo
 <br>
 ## Uso
 
-Crie um arquivo Code.txt e preencha ele com o codigo que quer analizar, ou descomente as seguintes linhas no main.rs e personalize o file.write:
-
-``` rust
-use std::io::Write;
-  {
-    let mut file = File::create("Code.txt").unwrap();
-    file.write(b"Hello World").unwrap();
-  }
-```
-
+Crie um arquivo Code.txt e preencha ele com o codigo que quer analizar.<br>
 No diretório /Compilador<br>
+
 Compile o programa com:
 ``` bash
 cargo build
 ```
-Depois teste ele com:
+Depois rode ele com:
 ``` bash
 cargo run
 ```
-
+Para testar o arquivo .rs traduzido rode os seguintes comandos no diretório /src:
+``` bash
+rustc translated.rs
+./translated
+```
