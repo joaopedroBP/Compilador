@@ -1,6 +1,7 @@
 mod arvore;
 mod lexer;
 mod parser;
+mod translate;
 use arvore::Node;
 use arvore::Tree;
 use std::cell::RefCell;
@@ -25,9 +26,9 @@ fn main() {
 
     if parser_result {
         println!("codigo válido");
+        token_tree.print_tree();
+        translate::salvar_e_formatar(&token_tree.root, "translated.rs").expect("Erro ao salvar");
     } else {
         println!("codigo inválido");
     }
-
-    token_tree.print_tree();
 }

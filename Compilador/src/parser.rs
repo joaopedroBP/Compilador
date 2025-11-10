@@ -831,7 +831,7 @@ fn FUNC(lista: &Vec<Token>, token: &mut Token, pos: &mut usize, pai: &NodeRef) -
                 erro("function parameter declaration missing ':'", token);
                 return false;
             }
-        } else if token.lexeme != "(" {
+        } else if token.lexeme != ")" {
             erro("function parameter with missing or invalid type", token);
             return false;
         }

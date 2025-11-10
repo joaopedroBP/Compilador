@@ -1,4 +1,6 @@
 use std::cell::RefCell;
+use std::fs;
+use std::process::Command;
 use std::rc::Rc;
 
 pub type NodeRef = Rc<RefCell<Node>>;
@@ -118,5 +120,27 @@ impl Tree {
 
     pub fn print_tree(&self) {
         println!("{}", Node::get_tree(&self.root));
+    }
+
+    pub fn gerar_codigo_rust(&self) -> String {
+        Self::gerar_rec(&self.root)
+    }
+
+    fn gerar_rec(node_ref: &NodeRef) -> String {
+        let node = node_ref.borrow();
+        let mut codigo = String::new();
+
+        codigo.push_str(&node.enter);
+
+        if node.nodes.is_empty() {
+            codigo.push_str(&node.nome);
+        } else {
+            for child in &node.nodes {
+                codigo.push_str(&Self::gerar_rec(child));
+            }
+        }
+
+        codigo.push_str(&node.exit);
+        codigo
     }
 }

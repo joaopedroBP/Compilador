@@ -199,7 +199,7 @@ fn is_floatin_point(code: &str) -> Token {
         return Token::new("Err", "???");
     }
 
-    for part in [before_dot,after_dot] {
+    for part in [before_dot, after_dot] {
         if !part.chars().all(|character| character.is_ascii_digit()) {
             return Token::new("Err", "???");
         }
