@@ -161,7 +161,6 @@ fn gerar_codigo(node_ref: &NodeRef) -> String {
         | "direct_attribution"
         | "simple_atribution"
         | "function_call_arguments" => {
-            // Estes nós apenas concatenam o código de seus filhos.
             node.nodes.iter().map(gerar_codigo).collect::<String>()
         }
 
@@ -349,20 +348,20 @@ fn gerar_while(node_ref: &NodeRef) -> String {
 
     let mut codigo = String::from("while ");
 
-    // 1. Geração da Condição: Tenta extrair a condição do while_parameters
+    
     if let Some(no_parametros) = content_children
         .iter()
         .find(|c| c.borrow().nome == "while_parameters")
     {
         codigo.push_str(&extrair_condicao(no_parametros));
     } else if content_children.iter().any(|c| c.borrow().nome == "TRUE") {
-        // Caso while(TRUE)
+    
         codigo.push_str("true");
     } else {
         codigo.push_str("/* Condição Desconhecida */");
     }
 
-    codigo.push_str(" {\n"); // Abre o bloco
+    codigo.push_str(" {\n"); 
 
     if let Some(bloco_while) = content_children
         .iter()

@@ -1,5 +1,6 @@
-Regra Bloco: S -> BLOCO BLOCO -> CMD BL BL -> BLOCO | e  
-CMD -> [IF|FOR|WHILE|function|println|scanln|declaração|atribuição|FUNC_CALL|break|continue|return] 
+Regra Bloco: S -> BLOCO 
+BLOCO -> CMD BLOCO | e  
+CMD -> [IF|FOR|WHILE|function|println|scanln|declaração|atribuição|FUNC_CALL|break|continue|return]
 
 Regra OPERATION: 
 
